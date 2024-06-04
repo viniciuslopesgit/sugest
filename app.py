@@ -3,6 +3,8 @@ from authlib.integrations.flask_client import OAuth
 import sqlite3
 import pandas as pd
 
+
+
 app = Flask(__name__)
 app.secret_key = 'seu_segredo'
 app.config['GOOGLE_CLIENT_ID'] = '213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com'
