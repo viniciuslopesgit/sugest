@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
     <title>Dashboard</title>
 </head>
 <body>
-    <h1>Bem-vindo ao Dashboard!</h1>
-    <p>Olá, {{ email }}! Você está logado com sucesso.</p>
-    <p>Aqui você pode adicionar o conteúdo e os recursos específicos do dashboard.</p>
-    <a href="/logout">Logout</a>
+    <div id="header">
+        <div id="user">
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+        <div id="content">
+            <h1>Bem-vindo ao Dashboard!</h1>
+
+        </div>
 </body>
 </html>

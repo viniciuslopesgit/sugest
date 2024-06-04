@@ -1,5 +1,6 @@
-from flask import Flask, redirect, url_for, session, render_template
+from flask import Flask, redirect, url_for, session, render_template, request
 from authlib.integrations.flask_client import OAuth
+import sqlite3
 
 app = Flask(__name__)
 app.secret_key = 'seu_segredo'
@@ -15,8 +16,18 @@ google = oauth.register(
     client_kwargs={'scope': 'openid profile email'},
 )
 
+# Função para inicializar o banco de dados
+def initialize_database():
+    conn = sqlite3.connect('sites.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS interactions
+                 (user_id INTEGER, site TEXT, liked INTEGER)''')
+    conn.commit()
+    conn.close()
+
 @app.route('/')
 def index():
+    initialize_database()
     email = session.get('email')
     if email:
         return redirect(url_for('dashboard'))  # Se o usuário estiver autenticado, redirecionar para a dashboard
@@ -46,13 +57,12 @@ def authorize():
         print('Erro durante a autorização:', e)
         return redirect('/')
 
-@app.route('/dashboard')
-def dashboard():
-    email = session.get('email')
-    if email:
-        return render_template('dashboard.html', email=email)
-    else:
-        return redirect('/')
+
+
+
+# Sistema de recomendação
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
