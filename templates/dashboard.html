@@ -12,10 +12,16 @@
             <a href="/logout">Logout</a>
         </div>
     </div>
-
         <div id="content">
-            <h1>Bem-vindo ao Dashboard!</h1>
-
+            <h1>Dashboard</h1>
+                <p>Bem-vindo, {{ email }}</p>
+                
+                <h2>Notícias Recomendadas</h2>
+                <ul>
+                    {% for url in urls %}
+                        <li><a href="{{ url }}">{{ url }}</a></li>
+                    {% endfor %}
+                </ul>
         </div>
 </body>
 </html>
