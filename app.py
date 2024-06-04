@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for, session, render_template, request
 from authlib.integrations.flask_client import OAuth
 import sqlite3
+import pandas as pd
 
 app = Flask(__name__)
 app.secret_key = 'seu_segredo'
@@ -57,10 +58,19 @@ def authorize():
         print('Erro durante a autorização:', e)
         return redirect('/')
 
+@app.route('/dashboard')
+def dashboard():
+    email = session.get('email')
+    if email:
+        return render_template('dashboard.html', email=email)
+    else:
+        return redirect('/')
 
 
 
 # Sistema de recomendação
+
+
 
 
 
