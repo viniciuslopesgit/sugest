@@ -1,4 +1,6 @@
 Flask
 authlib
 requests
+numpy
 pandas
+scikit-learn
