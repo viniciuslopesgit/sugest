@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for, session, render_template, request
 from authlib.integrations.flask_client import OAuth
-import sqlite3
+from create_db import get_database_connection
+import mysql.connector
 import pandas as pd
 import random
 
@@ -20,26 +21,19 @@ google = oauth.register(
 )
 
 def initialize_database():
-    conn = sqlite3.connect('sites.db')
+    conn = get_database_connection()  # Usa a função para obter a conexão
     c = conn.cursor()
     
+    
+
     # Criar a tabela de usuários, se não existir
     c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE)''')
+                 (id INTEGER PRIMARY KEY AUTO_INCREMENT, email VARCHAR(255) UNIQUE)''')
     
     # Criar a tabela de URLs, se não existir
     c.execute('''CREATE TABLE IF NOT EXISTS user_urls
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER,
+                 (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER,
                  url TEXT, rate INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))''')
-    
-    # Verificar se a coluna 'rate' já existe na tabela 'user_urls'
-    c.execute('''PRAGMA table_info(user_urls)''')
-    columns = c.fetchall()
-    rate_column_exists = any('rate' in column for column in columns)
-    
-    # Se a coluna 'rate' não existir, adicioná-la
-    if not rate_column_exists:
-        c.execute('''ALTER TABLE user_urls ADD COLUMN rate INTEGER DEFAULT 0''')
     
     conn.commit()
     conn.close()
@@ -48,9 +42,10 @@ def initialize_database():
 initialize_database()
 
 def generate_news_urls(user_id):
-    conn = sqlite3.connect('sites.db')
+    conn = get_database_connection()  # Usa a função para obter a conexão
     c = conn.cursor()
-    c.execute('SELECT * FROM user_urls WHERE user_id = ?', (user_id,))
+    
+    c.execute('SELECT * FROM user_urls WHERE user_id = %s', (user_id,))
     urls = c.fetchall()
     conn.close()
     
@@ -62,10 +57,11 @@ def generate_news_urls(user_id):
         selected_urls = random.sample(news_data['url'].tolist(), 5)
         
         # Inserir os URLs gerados no banco de dados com a avaliação inicial
-        conn = sqlite3.connect('sites.db')
+        conn = get_database_connection()  # Usa a função para obter a conexão
         c = conn.cursor()
+
         for url in selected_urls:
-            c.execute('INSERT INTO user_urls (user_id, url, rate) VALUES (?, ?, ?)', (user_id, url, 0))
+            c.execute('INSERT INTO user_urls (user_id, url, rate) VALUES (%s, %s, %s)', (user_id, url, 0))
         conn.commit()
         conn.close()
         
@@ -77,14 +73,16 @@ def generate_news_urls(user_id):
 def index():
     email = session.get('email')
     if email:
-        conn = sqlite3.connect('sites.db')
+        conn = get_database_connection()  # Usa a função para obter a conexão
         c = conn.cursor()
-        c.execute('SELECT id FROM users WHERE email = ?', (email,))
+
+        c.execute('SELECT id FROM users WHERE email = %s', (email,))
         user = c.fetchone()
         if not user:
-            user_id = c.execute('INSERT INTO users (email) VALUES (?)', (email,)).lastrowid
-            news_urls = generate_news_urls(user_id)
+            c.execute('INSERT INTO users (email) VALUES (%s)', (email,))
             conn.commit()
+            user_id = c.lastrowid
+            news_urls = generate_news_urls(user_id)
         conn.close()
         return redirect(url_for('dashboard'))
     else:
@@ -94,9 +92,10 @@ def index():
 def dashboard():
     email = session.get('email')
     if email:
-        conn = sqlite3.connect('sites.db')
+        conn = get_database_connection()  # Usa a função para obter a conexão
         c = conn.cursor()
-        c.execute('SELECT id FROM users WHERE email = ?', (email,))
+
+        c.execute('SELECT id FROM users WHERE email = %s', (email,))
         user_id = c.fetchone()[0]
         urls = generate_news_urls(user_id)
         conn.close()
@@ -108,15 +107,15 @@ def dashboard():
 def visit_url(url_id):
     email = session.get('email')
     if email:
-        conn = sqlite3.connect('sites.db')
+        conn = get_database_connection()  # Usa a função para obter a conexão
         c = conn.cursor()
-        c.execute('UPDATE user_urls SET rate = rate + 1 WHERE id = ?', (url_id,))
+
+        c.execute('UPDATE user_urls SET rate = rate + 1 WHERE id = %s', (url_id,))
         conn.commit()
         conn.close()
         return redirect(url_for('dashboard'))
     else:
         return redirect('/')
-
 
 
 
