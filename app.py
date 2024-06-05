@@ -28,8 +28,14 @@ google = oauth.register(
 def initialize_database():
     conn = get_database_connection()
     c = conn.cursor()
+    
+    
+
+    # Criar a tabela de usuários, se não existir
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY AUTO_INCREMENT, email VARCHAR(255) UNIQUE)''')
+    
+    # Criar a tabela de URLs, se não existir
     c.execute('''CREATE TABLE IF NOT EXISTS user_urls
                  (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER,
                  url TEXT, rate INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))''')
@@ -45,10 +51,16 @@ def generate_news_urls(user_id):
     c.execute('SELECT * FROM user_urls WHERE user_id = %s', (user_id,))
     urls = c.fetchall()
     conn.close()
-    if not urls:
+    
+    if not urls:  # Se não houver URLs associadas ao usuário
+        # Carregar o arquivo CSV
         news_data = pd.read_csv('data/news.csv')
+        
+        # Selecionar aleatoriamente 5 URLs
         selected_urls = random.sample(news_data['url'].tolist(), 5)
-        conn = get_database_connection()
+        
+        # Inserir os URLs gerados no banco de dados com a avaliação inicial
+        conn = get_database_connection()  # Usa a função para obter a conexão
         c = conn.cursor()
 
         for url in selected_urls:
@@ -58,6 +70,7 @@ def generate_news_urls(user_id):
         return selected_urls
     else:
         return [url[2] for url in urls]
+
 
 
 @app.route('/')
@@ -108,6 +121,16 @@ def visit_url(url_id):
         return redirect('/')
 
 
+
+
+
+
+
+
+# Restante do código permanece igual...
+
+
+
 @app.route('/login')
 def login():
     redirect_uri = url_for('authorize', _external=True)
@@ -126,11 +149,13 @@ def authorize():
         user_info = user_info_resp.json()
         email = user_info.get('email')
         session['email'] = email
-        conn = get_database_connection()
+        
+        conn = sqlite3.connect('sites.db')
         c = conn.cursor()
         c.execute('INSERT INTO users (email) VALUES (%s) ON DUPLICATE KEY UPDATE email=email', (email,))
         conn.commit()
-        c.execute('SELECT id FROM users WHERE email = %s', (email,))
+        
+        c.execute('SELECT id FROM users WHERE email = ?', (email,))
         user_id = c.fetchone()[0]
         session['user_id'] = user_id
         conn.close()
@@ -146,13 +171,17 @@ def interact():
         return redirect('/login')
     user_id = session['user_id']
     site = request.form.get('site')
-    rate = request.form.get('rate')
-    conn = get_database_connection()
+    rate = request.form.get('rate')  # Captura o valor da avaliação
+    
+    conn = sqlite3.connect('sites.db')
     c = conn.cursor()
     c.execute('INSERT INTO interactions (user_id, site, rate) VALUES (%s, %s, %s)', (user_id, site, rate))
     conn.commit()
     conn.close()
     return redirect('/dashboard')
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
