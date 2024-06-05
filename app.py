@@ -9,6 +9,8 @@ app = Flask(__name__)
 app.secret_key = 'seu_segredo'
 init_app(app)
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:root:"localhost/db_users'
+
 app.config['GOOGLE_CLIENT_ID'] = '213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com'
 app.config['GOOGLE_CLIENT_SECRET'] = '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'
 

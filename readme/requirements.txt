@@ -4,6 +4,5 @@ requests
 numpy
 pandas
 scikit-learn
-mys
-ql-connector
 mysql-connector-python
+mysql-connector-python-rf 
