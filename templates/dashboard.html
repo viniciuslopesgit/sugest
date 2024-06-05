@@ -19,7 +19,7 @@
         <h2>Notícias Recomendadas</h2>
         <ul>
             {% for id, url, rate in urls %}
-                <li>{{ id }} - <a href="{{ url }}">{{ url }}</a> - Rate: {{ rate }}</li>
+                <li>{{ id }} - <a href="{{ url }}?url_id={{ id }}">{{ url }}</a> - Rate: {{ rate }}</li>
             {% endfor %}
         </ul>
     </div>

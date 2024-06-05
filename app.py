@@ -1,16 +1,12 @@
 from flask import Flask, redirect, url_for, session, render_template, request
 from authlib.integrations.flask_client import OAuth
 from googleAuth import init_app, login, logout, authorize
-from create_db import get_database_connection
 
 import pandas as pd
 import random
-import mysql.connector
 
 app = Flask(__name__)
-
 app.secret_key = 'seu_segredo'
-
 init_app(app)
 
 app.config['GOOGLE_CLIENT_ID'] = '213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com'
@@ -25,54 +21,20 @@ google = oauth.register(
     client_kwargs={'scope': 'openid profile email'},
 )
 
-def initialize_database():
-    conn = get_database_connection()
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY AUTO_INCREMENT, email VARCHAR(255) UNIQUE)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS user_urls
-                 (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER,
-                 url TEXT, rate INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))''')
-    conn.commit()
-    conn.close()
-
-initialize_database()
-
-
+# Função para gerar URLs de notícias (substituindo a funcionalidade do MySQL)
 def generate_news_urls(user_id):
-    conn = get_database_connection()
-    c = conn.cursor()
-    c.execute('SELECT id, url, rate FROM user_urls WHERE user_id = %s', (user_id,))
-    urls = c.fetchall()
-    conn.close()
-    if not urls:
-        news_data = pd.read_csv('data/news.csv')
-        selected_urls = random.sample(news_data['url'].tolist(), 5)
-        conn = get_database_connection()
-        c = conn.cursor()
+    # Aqui você pode implementar a lógica para gerar URLs de notícias sem acessar o MySQL
+    # Por exemplo, você pode ler de um arquivo CSV ou de uma API
+    news_data = pd.read_csv('data/news.csv')
+    selected_urls = random.sample(news_data['url'].tolist(), 5)
+    return [(idx, url, 0) for idx, url in enumerate(selected_urls)]
 
-        for url in selected_urls:
-            c.execute('INSERT INTO user_urls (user_id, url, rate) VALUES (%s, %s, %s)', (user_id, url, 0))
-        conn.commit()
-        conn.close()
-        return [(row[0], row[1], row[2]) for row in urls]
-    else:
-        return [(row[0], row[1], row[2]) for row in urls]
-
+# Rotas da sua aplicação
 @app.route('/')
 def index():
     email = session.get('email')
     if email:
-        conn = get_database_connection()
-        c = conn.cursor()
-        c.execute('SELECT id FROM users WHERE email = %s', (email,))
-        user = c.fetchone()
-        if not user:
-            c.execute('INSERT INTO users (email) VALUES (%s)', (email,))
-            conn.commit()
-            user_id = c.lastrowid
-            news_urls = generate_news_urls(user_id)
-        conn.close()
+        # Aqui você pode adicionar lógica para verificar se o usuário existe ou não
         return redirect(url_for('dashboard'))
     else:
         return render_template('index.html')
@@ -95,14 +57,7 @@ def authorize():
         user_info = user_info_resp.json()
         email = user_info.get('email')
         session['email'] = email
-        conn = get_database_connection()
-        c = conn.cursor()
-        c.execute('INSERT INTO users (email) VALUES (%s) ON DUPLICATE KEY UPDATE email=email', (email,))
-        conn.commit()
-        c.execute('SELECT id FROM users WHERE email = %s', (email,))
-        user_id = c.fetchone()[0]
-        session['user_id'] = user_id
-        conn.close()
+        # Aqui você pode adicionar lógica para autenticar o usuário sem usar o MySQL
         print('Usuário autenticado com sucesso:', email)
         return redirect(url_for('dashboard'))
     except Exception as e:
@@ -113,33 +68,22 @@ def authorize():
 def dashboard():
     email = session.get('email')
     if email:
-        conn = get_database_connection()
-        c = conn.cursor()
-        c.execute('SELECT id FROM users WHERE email = %s', (email,))
-        user_id = c.fetchone()[0]
+        # Aqui você pode adicionar lógica para recuperar URLs de notícias para o usuário sem usar o MySQL
+        user_id = session.get('user_id')
         urls = generate_news_urls(user_id)
-        conn.close()
         return render_template('dashboard.html', email=email, urls=urls)
     else:
         return redirect('/')
 
 @app.route('/click')
 def click():
+    print("CARREGOU")
     url_id = request.args.get('url_id')
     if url_id:
-        conn = get_database_connection()
-        c = conn.cursor()
-        user_id = session.get('user_id')
-        c.execute('UPDATE user_urls SET rate = rate + 1 WHERE user_id = %s AND id = %s', (user_id, url_id))
-        conn.commit()
-        conn.close()
+        # Aqui você pode adicionar lógica para registrar o clique do usuário sem usar o MySQL
         return redirect(url_for('dashboard'))
     else:
         return "Parâmetro 'url_id' ausente.", 400
 
-
-
-
 if __name__ == '__main__':
     app.run(debug=True)
-

@@ -2,7 +2,6 @@
 
 from flask import redirect, url_for, session, render_template, request
 from authlib.integrations.flask_client import OAuth
-from create_db import get_database_connection
 
 oauth = OAuth()
 
@@ -13,8 +12,6 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid profile email'},
 )
-
-app = None  # Será definido posteriormente na função init_app()
 
 def init_app(flask_app):
     global app
@@ -36,18 +33,6 @@ def authorize():
         user_info = user_info_resp.json()
         email = user_info.get('email')
         session['email'] = email
-        
-        conn = get_database_connection()  # Usa a função para obter a conexão
-        c = conn.cursor()
-        c.execute('INSERT OR IGNORE INTO users (email) VALUES (?)', (email,))
-        conn.commit()
-        
-        c.execute('SELECT id FROM users WHERE email = ?', (email,))
-        user_id = c.fetchone()[0]
-        session['user_id'] = user_id
-        
-        conn.close()
-        
         print('Usuário autenticado com sucesso:', email)
         return redirect(url_for('dashboard'))
     except Exception as e:
