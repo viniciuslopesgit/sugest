@@ -9,8 +9,3 @@ mysql-connector-python-rf
 flask_sqlalchemy
 pymysql
 
-
-
-
-O código está funcional, entretanto está sempre salvando as
- 5 tabelas que estão a ser geradas no banco de dados.

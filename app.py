@@ -37,11 +37,6 @@ class News(db.Model):
         self.user_id = user_id
         self.url = url
         self.rate = rate
-    
-    def __init__(self, user_id, url, rate):
-        self.user_id = user_id
-        self.url = url
-        self.rate = rate
 
     def update_rate(self):
         # Incrementa o valor de 'rate' em 1
@@ -112,6 +107,10 @@ def dashboard():
     email = session.get('email')
     if email:
         user_id = session.get('user_id')
+        
+        # Gere URLs de notícias se necessário
+        generate_news_urls(user_id)
+        
         # Consulta ao banco de dados para recuperar as notícias do usuário atual
         user_news = News.query.filter_by(user_id=user_id).all()
         urls = []
@@ -124,6 +123,7 @@ def dashboard():
         return render_template('dashboard.html', email=email, urls=urls)
     else:
         return redirect('/')
+
 
 @app.route('/update_rate', methods=['POST'])
 def update_rate():
