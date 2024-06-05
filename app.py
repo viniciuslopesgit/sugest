@@ -42,7 +42,7 @@ initialize_database()
 def generate_news_urls(user_id):
     conn = get_database_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM user_urls WHERE user_id = %s', (user_id,))
+    c.execute('SELECT id, url, rate FROM user_urls WHERE user_id = %s', (user_id,))
     urls = c.fetchall()
     conn.close()
     if not urls:
@@ -55,10 +55,9 @@ def generate_news_urls(user_id):
             c.execute('INSERT INTO user_urls (user_id, url, rate) VALUES (%s, %s, %s)', (user_id, url, 0))
         conn.commit()
         conn.close()
-        return selected_urls
+        return [(row[0], row[1], row[2]) for row in urls]
     else:
-        return [url[2] for url in urls]
-
+        return [(row[0], row[1], row[2]) for row in urls]
 
 @app.route('/')
 def index():
@@ -77,36 +76,6 @@ def index():
         return redirect(url_for('dashboard'))
     else:
         return render_template('index.html')
-
-
-@app.route('/dashboard')
-def dashboard():
-    email = session.get('email')
-    if email:
-        conn = get_database_connection()
-        c = conn.cursor()
-        c.execute('SELECT id FROM users WHERE email = %s', (email,))
-        user_id = c.fetchone()[0]
-        urls = generate_news_urls(user_id)
-        conn.close()
-        return render_template('dashboard.html', email=email, urls=urls)
-    else:
-        return redirect('/')
-
-
-@app.route('/visit/<int:url_id>')
-def visit_url(url_id):
-    email = session.get('email')
-    if email:
-        conn = get_database_connection()
-        c = conn.cursor()
-        c.execute('UPDATE user_urls SET rate = rate + 1 WHERE id = %s', (url_id,))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('dashboard'))
-    else:
-        return redirect('/')
-
 
 @app.route('/login')
 def login():
@@ -140,19 +109,36 @@ def authorize():
         print('Erro durante a autorização:', e)
         return redirect('/')
 
-@app.route('/interact', methods=['POST'])
-def interact():
-    if 'user_id' not in session:
-        return redirect('/login')
-    user_id = session['user_id']
-    site = request.form.get('site')
-    rate = request.form.get('rate')
-    conn = get_database_connection()
-    c = conn.cursor()
-    c.execute('INSERT INTO interactions (user_id, site, rate) VALUES (%s, %s, %s)', (user_id, site, rate))
-    conn.commit()
-    conn.close()
-    return redirect('/dashboard')
+@app.route('/dashboard')
+def dashboard():
+    email = session.get('email')
+    if email:
+        conn = get_database_connection()
+        c = conn.cursor()
+        c.execute('SELECT id FROM users WHERE email = %s', (email,))
+        user_id = c.fetchone()[0]
+        urls = generate_news_urls(user_id)
+        conn.close()
+        return render_template('dashboard.html', email=email, urls=urls)
+    else:
+        return redirect('/')
+
+@app.route('/click')
+def click():
+    url_id = request.args.get('url_id')
+    if url_id:
+        conn = get_database_connection()
+        c = conn.cursor()
+        user_id = session.get('user_id')
+        c.execute('UPDATE user_urls SET rate = rate + 1 WHERE user_id = %s AND id = %s', (user_id, url_id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('dashboard'))
+    else:
+        return "Parâmetro 'url_id' ausente.", 400
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
