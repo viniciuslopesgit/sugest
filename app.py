@@ -1,3 +1,4 @@
+from flask import jsonify
 from flask import Flask, redirect, url_for, session, render_template, request
 from authlib.integrations.flask_client import OAuth
 import pandas as pd
@@ -36,6 +37,15 @@ class News(db.Model):
         self.user_id = user_id
         self.url = url
         self.rate = rate
+    
+    def __init__(self, user_id, url, rate):
+        self.user_id = user_id
+        self.url = url
+        self.rate = rate
+
+    def update_rate(self):
+        # Incrementa o valor de 'rate' em 1
+        self.rate += 1
 
 # Função para gerar URLs de notícias e inserir no banco de dados
 def generate_news_urls(user_id):
@@ -115,14 +125,28 @@ def dashboard():
     else:
         return redirect('/')
 
-@app.route('/click')
-def click():
-    print("CARREGOU")
-    url_id = request.args.get('url_id')
-    if url_id:
-        return redirect(url_for('dashboard'))
-    else:
-        return "Parâmetro 'url_id' ausente.", 400
+@app.route('/update_rate', methods=['POST'])
+def update_rate():
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        url = request.form.get('url')
+        
+        # Consulta ao banco de dados para encontrar a notícia correspondente
+        news_item = News.query.filter_by(user_id=user_id, url=url).first()
+        
+        if news_item:
+            # Atualiza o valor de 'rate' no banco de dados
+            news_item.rate += 1
+            db.session.commit()
+            
+            return 'Rate atualizado com sucesso!'
+        else:
+            return 'Notícia não encontrada para o usuário especificado.'
+
+    return 'Método inválido.'
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+
+    
+    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
@@ -9,19 +13,49 @@
 <body>
     <div id="header">
         <div id="user">
+            <p>Bem-vindo, {{ email }}</p>
             <a href="/logout">Logout</a>
         </div>
     </div>
     <div id="content">
         <h1>Dashboard</h1>
-        <p>Bem-vindo, {{ email }}</p>
                 
         <h2>Notícias Recomendadas</h2>
         <ul>
             {% for item in urls %}
-                <li>User ID: {{ item.user_id }}, URL: <a href=" {{ item.url }} ">{{ item.url }}</a> , Rate: {{ item.rate }}</li>
+                <li>User ID: {{ item.user_id }}, URL: <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ item.url }}</a>, Rate: {{ item.rate }}</li>
             {% endfor %}
         </ul>
+        
+        <script>
+            function updateRate(user_id, url) {
+                fetch('/update_rate', {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'user_id': user_id,
+                        'url': url
+                    }),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Atualiza a página após a conclusão da atualização do rate
+                        window.location.reload();
+                    } else {
+                        console.error('Erro ao atualizar rate:', response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar rate:', error);
+                });
+            }
+        </script>
+        
+                
     </div>
+    
+    
 </body>
 </html>
