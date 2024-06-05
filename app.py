@@ -23,39 +23,31 @@ google = oauth.register(
 def initialize_database():
     conn = get_database_connection()  # Usa a função para obter a conexão
     c = conn.cursor()
-    
-    
-
     # Criar a tabela de usuários, se não existir
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY AUTO_INCREMENT, email VARCHAR(255) UNIQUE)''')
-    
     # Criar a tabela de URLs, se não existir
     c.execute('''CREATE TABLE IF NOT EXISTS user_urls
                  (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER,
                  url TEXT, rate INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))''')
-    
     conn.commit()
     conn.close()
 
 # Inicializar o banco de dados quando o programa for iniciado
 initialize_database()
 
+
 def generate_news_urls(user_id):
     conn = get_database_connection()  # Usa a função para obter a conexão
     c = conn.cursor()
-    
     c.execute('SELECT * FROM user_urls WHERE user_id = %s', (user_id,))
     urls = c.fetchall()
     conn.close()
-    
     if not urls:  # Se não houver URLs associadas ao usuário
         # Carregar o arquivo CSV
         news_data = pd.read_csv('data/news.csv')
-        
         # Selecionar aleatoriamente 5 URLs
         selected_urls = random.sample(news_data['url'].tolist(), 5)
-        
         # Inserir os URLs gerados no banco de dados com a avaliação inicial
         conn = get_database_connection()  # Usa a função para obter a conexão
         c = conn.cursor()
@@ -64,10 +56,10 @@ def generate_news_urls(user_id):
             c.execute('INSERT INTO user_urls (user_id, url, rate) VALUES (%s, %s, %s)', (user_id, url, 0))
         conn.commit()
         conn.close()
-        
         return selected_urls
     else:
         return [url[2] for url in urls]  # Retorna as URLs já salvas no banco de dados
+
 
 @app.route('/')
 def index():
@@ -75,7 +67,6 @@ def index():
     if email:
         conn = get_database_connection()  # Usa a função para obter a conexão
         c = conn.cursor()
-
         c.execute('SELECT id FROM users WHERE email = %s', (email,))
         user = c.fetchone()
         if not user:
@@ -88,13 +79,13 @@ def index():
     else:
         return render_template('index.html')
 
+
 @app.route('/dashboard')
 def dashboard():
     email = session.get('email')
     if email:
         conn = get_database_connection()  # Usa a função para obter a conexão
         c = conn.cursor()
-
         c.execute('SELECT id FROM users WHERE email = %s', (email,))
         user_id = c.fetchone()[0]
         urls = generate_news_urls(user_id)
@@ -103,28 +94,19 @@ def dashboard():
     else:
         return redirect('/')
 
+
 @app.route('/visit/<int:url_id>')
 def visit_url(url_id):
     email = session.get('email')
     if email:
         conn = get_database_connection()  # Usa a função para obter a conexão
         c = conn.cursor()
-
         c.execute('UPDATE user_urls SET rate = rate + 1 WHERE id = %s', (url_id,))
         conn.commit()
         conn.close()
         return redirect(url_for('dashboard'))
     else:
         return redirect('/')
-
-
-
-
-
-
-
-
-# Restante do código permanece igual...
 
 
 
@@ -146,18 +128,14 @@ def authorize():
         user_info = user_info_resp.json()
         email = user_info.get('email')
         session['email'] = email
-        
         conn = sqlite3.connect('sites.db')
         c = conn.cursor()
         c.execute('INSERT OR IGNORE INTO users (email) VALUES (?)', (email,))
         conn.commit()
-        
         c.execute('SELECT id FROM users WHERE email = ?', (email,))
         user_id = c.fetchone()[0]
         session['user_id'] = user_id
-        
         conn.close()
-        
         print('Usuário autenticado com sucesso:', email)
         return redirect(url_for('dashboard'))
     except Exception as e:
@@ -168,19 +146,15 @@ def authorize():
 def interact():
     if 'user_id' not in session:
         return redirect('/login')
-    
     user_id = session['user_id']
     site = request.form.get('site')
     rate = request.form.get('rate')  # Captura o valor da avaliação
-    
     conn = sqlite3.connect('sites.db')
     c = conn.cursor()
     c.execute('INSERT INTO interactions (user_id, site, rate) VALUES (?, ?, ?)', (user_id, site, rate))
     conn.commit()
     conn.close()
-    
     return redirect('/dashboard')
-
 
 
 
