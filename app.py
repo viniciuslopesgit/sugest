@@ -1,42 +1,72 @@
 from flask import Flask, redirect, url_for, session, render_template, request
 from authlib.integrations.flask_client import OAuth
-from googleAuth import init_app, login, logout, authorize
-
 import pandas as pd
 import random
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.secret_key = 'seu_segredo'
-init_app(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:root:"localhost/db_users'
+app.secret_key = 'seu_segredo'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:mabsam@localhost/db_users'
+
+db = SQLAlchemy(app)
 
 app.config['GOOGLE_CLIENT_ID'] = '213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com'
 app.config['GOOGLE_CLIENT_SECRET'] = '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'
 
 oauth = OAuth(app)
+
 google = oauth.register(
     name='google',
-    client_id=app.config['GOOGLE_CLIENT_ID'],
-    client_secret=app.config['GOOGLE_CLIENT_SECRET'],
+    client_id='213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com',
+    client_secret='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',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid profile email'},
 )
 
-# Função para gerar URLs de notícias (substituindo a funcionalidade do MySQL)
+# Modelo de dados do banco de dados
+class News(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(50))
+    url = db.Column(db.String(200))
+    rate = db.Column(db.Integer)
+
+    def __init__(self, user_id, url, rate):
+        self.user_id = user_id
+        self.url = url
+        self.rate = rate
+
+# Função para gerar URLs de notícias e inserir no banco de dados
 def generate_news_urls(user_id):
-    # Aqui você pode implementar a lógica para gerar URLs de notícias sem acessar o MySQL
-    # Por exemplo, você pode ler de um arquivo CSV ou de uma API
-    news_data = pd.read_csv('data/news.csv')
-    selected_urls = random.sample(news_data['url'].tolist(), 5)
-    return [(idx, url, 0) for idx, url in enumerate(selected_urls)]
+    existing_urls_count = News.query.filter_by(user_id=user_id).count()
+
+    if existing_urls_count == 5:
+        # Já existem cinco URLs, não é necessário adicionar mais
+        return []
+    elif existing_urls_count < 5:
+        # Precisamos adicionar mais URLs até que existam cinco no total
+        news_data = pd.read_csv('data/news.csv')
+        selected_urls = random.sample(news_data['url'].tolist(), 5 - existing_urls_count)
+
+        news_list = []
+        for url in selected_urls:
+            rate = 0
+            new_url = News(user_id=user_id, url=url, rate=rate)
+            db.session.add(new_url)
+            news_list.append({'user_id': user_id, 'url': url, 'rate': rate})
+        
+        db.session.commit()
+
+        return news_list
+
+
 
 # Rotas da sua aplicação
 @app.route('/')
 def index():
     email = session.get('email')
     if email:
-        # Aqui você pode adicionar lógica para verificar se o usuário existe ou não
         return redirect(url_for('dashboard'))
     else:
         return render_template('index.html')
@@ -59,7 +89,8 @@ def authorize():
         user_info = user_info_resp.json()
         email = user_info.get('email')
         session['email'] = email
-        # Aqui você pode adicionar lógica para autenticar o usuário sem usar o MySQL
+        # Simulação de um user_id
+        session['user_id'] = email.split('@')[0]
         print('Usuário autenticado com sucesso:', email)
         return redirect(url_for('dashboard'))
     except Exception as e:
@@ -70,9 +101,16 @@ def authorize():
 def dashboard():
     email = session.get('email')
     if email:
-        # Aqui você pode adicionar lógica para recuperar URLs de notícias para o usuário sem usar o MySQL
         user_id = session.get('user_id')
-        urls = generate_news_urls(user_id)
+        # Consulta ao banco de dados para recuperar as notícias do usuário atual
+        user_news = News.query.filter_by(user_id=user_id).all()
+        urls = []
+        for news in user_news:
+            urls.append({
+                'user_id': news.user_id,
+                'url': news.url,
+                'rate': news.rate
+            })
         return render_template('dashboard.html', email=email, urls=urls)
     else:
         return redirect('/')
@@ -82,7 +120,6 @@ def click():
     print("CARREGOU")
     url_id = request.args.get('url_id')
     if url_id:
-        # Aqui você pode adicionar lógica para registrar o clique do usuário sem usar o MySQL
         return redirect(url_for('dashboard'))
     else:
         return "Parâmetro 'url_id' ausente.", 400

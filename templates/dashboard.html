@@ -18,8 +18,8 @@
                 
         <h2>Notícias Recomendadas</h2>
         <ul>
-            {% for id, url, rate in urls %}
-                <li>{{ id }} - <a href="{{ url }}?url_id={{ id }}">{{ url }}</a> - Rate: {{ rate }}</li>
+            {% for item in urls %}
+                <li>User ID: {{ item.user_id }}, URL: <a href=" {{ item.url }} ">{{ item.url }}</a> , Rate: {{ item.rate }}</li>
             {% endfor %}
         </ul>
     </div>
