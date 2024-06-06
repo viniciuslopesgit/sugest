@@ -34,9 +34,11 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255))
+    name = db.Column(db.String(255))
 
-    def __init__(self, email, password=None):
+    def __init__(self, email, name, password=None):
         self.email = email
+        self.name = name
         if password:
             self.password = generate_password_hash(password)
 
@@ -101,16 +103,18 @@ def authorize():
         user_info_resp = google.get('https://www.googleapis.com/oauth2/v3/userinfo', token=token)
         user_info = user_info_resp.json()
         email = user_info.get('email')
+        name = user_info.get('name')
         
         if not email:
             raise ValueError("Email not found in user_info", user_info)
         
         session['email'] = email
+        session['name'] = name
 
         # Verifica se o usuário já existe no banco de dados
         user = User.query.filter_by(email=email).first()
         if not user:
-                new_user = User(email=email)
+                new_user = User(email=email, name=name)
                 db.session.add(new_user)
                 db.session.commit()
         
