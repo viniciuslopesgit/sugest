@@ -8,5 +8,4 @@ mysql-connector-python
 mysql-connector-python-rf 
 flask_sqlalchemy
 pymysql
-Flask-OAuthlib
 
