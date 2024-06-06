@@ -1,12 +1,12 @@
+import pandas as pd
+import random
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 from flask import jsonify
-from flask import Flask, redirect, url_for, session, render_template, request
+from flask import Flask, redirect, url_for, session, render_template, request, jsonify
 from authlib.integrations.flask_client import OAuth
-import pandas as pd
-import random
 from flask_sqlalchemy import SQLAlchemy
-
+from bs4 import BeautifulSoup
 app = Flask(__name__)
 
 app.secret_key = 'seu_segredo'
@@ -134,9 +134,25 @@ def recommend_sites_for_user():
 
     return [{'id': rec[0], 'url': rec[1], 'similarity': rec[2]} for rec in top_recommendations]
 
+def load_url_names_from_csv():
+    url_names = {}
+    try:
+        df = pd.read_csv('data/url_data.csv')
+
+        for index, row in df.iterrows():
+            url_names[int(row['id'])] = row['name']
+    except FileNotFoundError:
+        print("Arquivo data_url.csv não encontrado")
+    except Exception as e:
+        print("Erro ao ler o arquivo data.url.csv")
+    return url_names
 
 
-# ----------------------- Rotas 
+
+
+
+# ----------------------------------- ROTAS --------------------------------------#
+
 
 @app.route('/')
 def index():
@@ -203,6 +219,7 @@ def dashboard():
         urls = []
         for news in user_news:
             urls.append({
+                'id': news.id,
                 'user_id': news.user_id,
                 'url': news.url,
                 'rate': news.rate
@@ -211,7 +228,9 @@ def dashboard():
         recommend_sites = recommend_sites_for_user()
         print(recommend_sites_for_user())
 
-        return render_template('dashboard.html', name=name, email=email, urls=urls, recommend_sites=recommend_sites)
+        url_names = load_url_names_from_csv()
+
+        return render_template('dashboard.html', name=name, email=email, urls=urls, recommend_sites=recommend_sites, url_names=url_names)
     else:
         return redirect('/')
 

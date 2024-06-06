@@ -2,9 +2,6 @@
 <html lang="pt-br">
 <head>
 
-    
-    
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
@@ -23,8 +20,8 @@
         <h2>Favoritos</h2>
             <ul>
                 {% for item in urls %}
-                    <li>User ID: {{ item.user_id }}, URL: <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ item.url }}</a>
-                        <button onclick="toggleFavorite('{{ item.user_id }}', '{{ item.url }}')">Favorito</button>, Rate: <span id="rate_{{ item.url }}">{{ item.rate }}</span>
+                    <li><!--User ID: {{ item.user_id }}, URL:--> <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ url_names[item.id] }} </a>
+                        <button onclick="toggleFavorite('{{ item.user_id }}', '{{ item.url }}')">Favorito</button><span style="display: none;" id="rate_{{ item.url }}">{{ item.rate }}</span>
                     </li>
                 {% endfor %}
             </ul>
