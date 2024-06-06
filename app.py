@@ -1,3 +1,5 @@
+from werkzeug.security import generate_password_hash
+from datetime import datetime
 from flask import jsonify
 from flask import Flask, redirect, url_for, session, render_template, request
 from authlib.integrations.flask_client import OAuth
@@ -25,8 +27,20 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid profile email'},
 )
+# -------------------------------- Funções
 
-# Modelo de dados do banco de dados
+# Criando login de usuário com a conta Google
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(255))
+
+    def __init__(self, email, password=None):
+        self.email = email
+        if password:
+            self.password = generate_password_hash(password)
+
+# GERA 5 NOVOS SITES
 class News(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(50))
@@ -39,18 +53,14 @@ class News(db.Model):
         self.rate = rate
 
     def update_rate(self):
-        # Incrementa o valor de 'rate' em 1
         self.rate += 1
 
-# Função para gerar URLs de notícias e inserir no banco de dados
 def generate_news_urls(user_id):
     existing_urls_count = News.query.filter_by(user_id=user_id).count()
 
     if existing_urls_count == 5:
-        # Já existem cinco URLs, não é necessário adicionar mais
         return []
     elif existing_urls_count < 5:
-        # Precisamos adicionar mais URLs até que existam cinco no total
         news_data = pd.read_csv('data/news.csv')
         selected_urls = random.sample(news_data['url'].tolist(), 5 - existing_urls_count)
 
@@ -65,9 +75,7 @@ def generate_news_urls(user_id):
 
         return news_list
 
-
-
-# Rotas da sua aplicação
+# ----------------------- Rotas da sua aplicação
 @app.route('/')
 def index():
     email = session.get('email')
@@ -93,9 +101,22 @@ def authorize():
         user_info_resp = google.get('https://www.googleapis.com/oauth2/v3/userinfo', token=token)
         user_info = user_info_resp.json()
         email = user_info.get('email')
+        
+        if not email:
+            raise ValueError("Email not found in user_info", user_info)
+        
         session['email'] = email
+
+        # Verifica se o usuário já existe no banco de dados
+        user = User.query.filter_by(email=email).first()
+        if not user:
+                new_user = User(email=email)
+                db.session.add(new_user)
+                db.session.commit()
+        
         # Simulação de um user_id
         session['user_id'] = email.split('@')[0]
+
         print('Usuário autenticado com sucesso:', email)
         return redirect(url_for('dashboard'))
     except Exception as e:

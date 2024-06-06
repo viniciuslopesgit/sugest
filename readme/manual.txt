@@ -1,0 +1,105 @@
+
+
+Fazer:
+
+Usar authenticação do google para realizar o cadastro do usúario
+    se for o primeiro acesso do usuário ao site
+        salve na coluna 'users' no banco de dados
+            id, e-mail, senha (gere uma senha aleatória), 
+            
+            solicitar depois as informações:
+                gênero, idade, localização
+
+
+
+    Se for o primeiro login do usuário:
+        Página inicial onde o usuário selecionará em uma lista com 50 sites
+        baseado nos melhores sites com melhor pontuação
+            após a seleção
+                sistema incrementa o arquivo .csv
+                    idade, genero + sites escolhidos
+                        salva .csv
+            recomenda 50 sites baseado no seu gosto
+        
+        Volta a página dashboard e mostrará os sites recomendados
+
+
+
+
+
+
+-------------- MANUAL --------------
+
+Associar login do google a conta Google Cloud Plataform
+criar banco de dados:
+    db_users
+        users
+
+
+
+
+
+
+
+
+5 sites com estrela
+
+Sites recomendados
+Criar algorítimo a partir dos sites que o usuário meteu estrela
+
+
+
+
+
+A partir dos favoritos gerar mais sites0. Pré-requisitos:
+Conhecimento básico de Python: Familiaridade com sintax básica, variáveis, funções, estruturas de controle e bibliotecas padrão.
+Noções de HTML e CSS: Habilidade para criar estruturas e estilizar páginas web.
+Ambiente de desenvolvimento: Python 3 instalado e configurado com um ambiente virtual.
+
+1. Definição do Escopo e Planejamento:
+Objetivos: Determine quais tipos de recomendações serão oferecidas (tênis, roupas, música, notícias, filmes, etc.).
+Público-alvo: Defina o perfil dos usuários da sua aplicação (faixa etária, interesses, etc.).
+Dados: Estabeleça quais informações serão coletadas (cookies, histórico de pesquisa, etc.) e como serão armazenadas.
+Algoritmo de recomendação: Escolha um algoritmo para gerar as sugestões personalizadas (filtragem colaborativa, baseada em conteúdo, etc.).
+Tecnologias: Selecione as bibliotecas e ferramentas adicionais que serão utilizadas (ex: Flask-SQLAlchemy, bibliotecas de recomendação).
+
+2. Estrutura do Projeto:
+Crie a pasta principal do projeto: Organize seu código em pastas para melhor legibilidade e manutenção.
+app: Arquivo principal da aplicação Flask.
+templates: Arquivos HTML para as interfaces da aplicação.
+static: Imagens, CSS e outros arquivos estáticos.
+Inicialize o ambiente virtual: Ative o ambiente virtual para isolar as dependências do projeto.
+python3 -m venv env
+source env/bin/activate
+3. Desenvolvimento da Aplicação:
+3.1 Arquivo app.py:
+Importe as bibliotecas:
+Flask para criar a aplicação web.
+Outras bibliotecas necessárias (ex: Flask-SQLAlchemy, biblioteca de recomendação).
+Crie a instância do Flask:
+Inicialize a aplicação Flask com a pasta de templates.
+Defina as rotas:
+Utilize o decorador @app.route para criar rotas para as diferentes páginas da aplicação.
+Ex: @app.route('/') para a página inicial.
+Implemente as funções das rotas:
+Crie funções para cada rota, que retornarão o template HTML correspondente ou manipularão os dados da aplicação.
+Crie o banco de dados (opcional):
+Utilize uma biblioteca como o Flask-SQLAlchemy para criar e gerenciar o banco de dados.
+Defina os modelos para armazenar as informações dos usuários e as recomendações.
+
+Implemente a coleta de dados:
+Nas rotas adequadas, utilize métodos HTTP (GET, POST) para coletar as informações dos usuários (cookies, histórico de pesquisa).
+Armazene os dados coletados no banco de dados (se utilizado).
+
+Crie o algoritmo de recomendação:
+Escolha e implemente um algoritmo de recomendação adequado (filtragem colaborativa, baseada em conteúdo, etc.).
+Utilize os dados coletados dos usuários para gerar as sugestões personalizadas.
+Exiba as recomendações:
+Nas rotas das páginas de recomendação, utilize templates HTML para exibir as sugestões personalizadas aos usuários.
+2. Alternativas Responsáveis: Em vez de coletar cookies diretamente da conta Google do usuário, considere alternativas mais éticas e em conformidade com as políticas de privacidade: 
+
+Autenticação OAuth: Utilize o protocolo OAuth para permitir que os usuários autentiquem-se em sua aplicação usando sua conta Google sem revelar seus cookies ou outras credenciais. Dados Fornecidos pelo Usuário: Solicite que os usuários forneçam as informações necessárias de forma voluntária e explícita, mediante seu consentimento. 
+
+Análise Agregada: Utilize dados anonimizados ou agregados para análises e insights, sem identificar usuários individuais. 
+
+3. Implementação com Cuidado (Opcional):
