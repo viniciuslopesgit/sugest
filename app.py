@@ -120,19 +120,32 @@ def recommend_sites_for_user():
             rated_keywords.update(keywords.split(','))
 
     recommendations = []
+    site_info = {}
     for index, row in url_data.iterrows():
+        site_info[row['id']] = {'name': row['name'], 'url': row['url']}
         if row['id'] not in rated_ids:
             if isinstance(row['keywords'], str):
                 site_keywords = set(row['keywords'].split(','))
                 similarity = jaccard_similarity(rated_keywords, site_keywords)
-                recommendations.append((row['id'], row['url'], similarity))
+                recommendations.append((row['id'], similarity))
 
     # Ordenar as recomendações pela maior similaridade
-    recommendations.sort(key=lambda x: x[2], reverse=True)
+    recommendations.sort(key=lambda x: x[1], reverse=True)
 
-    top_recommendations = recommendations[:5]
+    top_recommendations = recommendations[:100]
 
-    return [{'id': rec[0], 'url': rec[1], 'similarity': rec[2]} for rec in top_recommendations]
+    # Adicionar informações de nome e URL aos resultados
+    result = []
+    for rec in top_recommendations:
+        site_id = rec[0]
+        result.append({
+            'id': site_id,
+            'name': site_info[site_id]['name'],
+            'url': site_info[site_id]['url'],
+            'similarity': rec[1]
+        })
+
+    return result
 
 def load_url_names_from_csv():
     url_names = {}
@@ -147,8 +160,10 @@ def load_url_names_from_csv():
         print("Erro ao ler o arquivo data.url.csv")
     return url_names
 
-
-
+def generate_random_color():
+    # Gera uma cor aleatória em formato hexadecimal
+    color = '#{:06x}'.format(random.randint(0, 0xFFFFFF))
+    return color
 
 
 # ----------------------------------- ROTAS --------------------------------------#

@@ -2,6 +2,12 @@
 
 Fazer:
 
+Criar uma coluna no .csv que busca a cor do site
+
+criar função para para buscar a cor no csv
+    chamr isso dentro do html com background-color
+
+
 Opção de favoritos 
 Almentar número de sites que serão gerados a primeira visita
 o usúario poderá fechar a aba essim o site receberá -1 no rate geral

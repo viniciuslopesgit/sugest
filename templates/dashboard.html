@@ -9,6 +9,9 @@
 </head>
 <body>
     <div id="header">
+        <div id="logo">
+            <a style="font-size: 22px; font-family: 'Times New Roman', Times, serif;"><i><b>unS</i>ugest</b></a>
+        </div>
         <div id="user">
             <p>Bem-vindo, {{ name }}</p>
             <a href="/logout">Logout</a>
@@ -18,18 +21,18 @@
         <h1>Dashboard</h1>
                 
         <h2>Favoritos</h2>
-            <ul>
+            <ul id="user_fav">
                 {% for item in urls %}
-                    <li><!--User ID: {{ item.user_id }}, URL:--> <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ url_names[item.id] }} </a>
-                        <button onclick="toggleFavorite('{{ item.user_id }}', '{{ item.url }}')">Favorito</button><span style="display: none;" id="rate_{{ item.url }}">{{ item.rate }}</span>
+                    <li class="item_fav"><!--User ID: {{ item.user_id }}, URL:--> <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ url_names[item.id] }} </a>
+                        <button onclick="toggleFavorite('{{ item.user_id }}', '{{ item.url }}')">Favorito</button><span  id="rate_{{ item.url }}">{{ item.rate }}</span>
                     </li>
                 {% endfor %}
             </ul>
         <h2>Recomendados</h2>
-        <ul>
+        <ul id="user_fav">
             {% for site in recommend_sites %}
-                <li>
-                    <a href="{{ site.url }}">{{ site.url }}</a> - Similaridade: {{ site.similarity }}
+                <li class="item_fav">
+                    <a href="{{ site.url }}"> {{ site.name }} </a> <!-- {{ site.similarity }} -->
                 </li>
             {% endfor %}
         </ul>

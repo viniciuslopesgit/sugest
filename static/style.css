@@ -1,11 +1,76 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     background-color: #fff;
+    margin: 0; /* Adicionado para remover margens padrão */
 }
+
+#header {
+    top: 0;
+    height: 60px;
+    width: 100%;
+    position: fixed; /* Alterado para posição fixa para que o cabeçalho permaneça fixo na parte superior */
+    background-color: #fff;
+    border-bottom: 1px solid rgb(236, 236, 236);
+    z-index: 1000; /* Adicionado z-index para garantir que o cabeçalho esteja acima de outros elementos */
+}
+#logo {
+    padding: 15px;
+    padding-left: 40px;
+}
+#user {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 40px;
+}
+
+#user a {
+    color: blue;
+    font-size: 14px;
+    text-decoration: none;
+    margin-left: 20px; /* Adicionado margem para separar o texto do link */
+}
+
+#user p {
+    font-size: 14px;
+    margin: 0; /* Adicionado para remover margens padrão */
+}
+
+#content {
+    padding: 60px 200px 0 200px;
+}
+
+#user_fav {
+    list-style: none; /* Remove os marcadores de lista */
+    padding: 0; /* Remove o preenchimento padrão da lista */
+    display: flex; /* Exibe os itens da lista em linha */
+    flex-wrap: wrap; /* Permite que os itens da lista quebrem para a próxima linha quando não há espaço suficiente */
+    justify-content: center; /* Alinha os itens horizontalmente ao centro */
+}
+
+.item_fav {
+    height: 80px;
+    width: 80px;
+    display: flex;
+    margin-right: 10px;
+    margin-bottom: 10px; /* Adicionado para adicionar espaço entre as linhas */
+    padding: 10px;
+    border-radius: 10px;
+    align-items: center; /* Alinha o conteúdo verticalmente ao centro */
+    background-color: #ededed;
+}
+
+.item_fav a {
+    text-decoration: none;
+    color: black; /* Alterado para preto para maior legibilidade */
+    font-size: 14px;
+    margin-top: 10px; /* Adicionado para alinhar o texto verticalmente */
+}
+
+.item_fav button {
+    margin-top: 10px; /* Adicionado para alinhar o botão verticalmente */
+}
+
 .login-button {
     padding: 10px 20px;
     font-size: 16px;
@@ -18,35 +83,3 @@ body {
 .login-button:hover {
     background-color: #357ae8;
 }
-
-#header {
-    top: 0;
-    height: 60px;
-    width: 100%;
-    position: absolute;
-    border-bottom: 1px solid rgb(236, 236, 236);
-}
-
-#content {
-    width: 100%;
-    padding: 200px;
-}
-
-#user a {
-
-    position: relative;
-    float: right;
-    padding: 20px;
-    color: blue;
-    font-size: 14px;
-    text-decoration: none;
-}
-
-#user p {
-    position: absolute;
-    font-size: 14px;
-    float: right;
-    padding: 10px;
-    padding-left: 20px;
-}
-
