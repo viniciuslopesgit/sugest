@@ -2,10 +2,35 @@
 
 Fazer:
 
-Criar uma coluna no .csv que busca a cor do site
+id,name,url,country,location,timezone,language,bundle,keywords
 
-criar função para para buscar a cor no csv
-    chamr isso dentro do html com background-color
+
+
+
+Preciso de que você crie uma programa em python que pegue os valores dispostos 
+no primeiro ficheiro csv(1.csv) ==
+id, url
+
+e adicione ao 
+
+o segundo ficheiro csv(2.csv) == 
+id,name,url,country,location,timezone,language,bundle,keywords
+
+Sendo necessário que:
+
+o primeiro ficheiro está desorganizado
+Preciso que você primeiro pegue a coluna 'id' e insira no segundo ficheiro na parte 'id'
+    e dê um valor a 'id', que será o sempre o último valor de 'id' da segunda coluna incrementado com +1
+
+Depois pegue a coluna 'url' do primeiro ficheiro e adicione ao segundo ficheiro
+na coluna 'url'
+
+Depois o restante das tabelas name,country,location,timezone,language,bundle prencha com espaço
+
+
+
+
+
 
 
 Opção de favoritos 

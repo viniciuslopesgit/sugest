@@ -29,7 +29,7 @@ google = oauth.register(
 )
 
 
-# -------------------------------- Funções
+# -------------------------------- FUNÇÕES --------------------------------------
 
 # Criando login de usuário com a conta Google
 class User(db.Model):
@@ -60,7 +60,6 @@ class User_fav(db.Model):
     def update_rate(self):
         self.rate += 1
 
-# Gera 5 sites
 def generate_news_urls(user_id):
     existing_urls_count = User_fav.query.filter_by(user_id=user_id).count()
 
