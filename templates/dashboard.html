@@ -23,35 +23,51 @@
         <h2>Notícias Recomendadas</h2>
         <ul>
             {% for item in urls %}
-                <li>User ID: {{ item.user_id }}, URL: <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ item.url }}</a>, Rate: {{ item.rate }}</li>
+                <li>User ID: {{ item.user_id }}, URL: <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ item.url }}</a>
+                    <button onclick="toggleFavorite('{{ item.user_id }}', '{{ item.url }}')">Favorito</button>, Rate: <span id="rate_{{ item.url }}">{{ item.rate }}</span>
+                </li>
             {% endfor %}
         </ul>
         
+        
         <script>
-            function updateRate(user_id, url) {
+            function toggleFavorite(user_id, url) {
+                var rateElement = document.getElementById('rate_' + url);
+                var currentRate = parseInt(rateElement.innerText);
+                var newRate = currentRate === 0 ? 1 : 0;
+        
+                // Atualiza a exibição do rate imediatamente
+                rateElement.innerText = newRate;
+        
+                // Envia uma requisição POST para atualizar o rate no servidor
                 fetch('/update_rate', {
                     method: 'POST',
-                    body: new URLSearchParams({
-                        'user_id': user_id,
-                        'url': url
-                    }),
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: user_id,
+                        url: url,
+                        rate: newRate
+                    })
                 })
                 .then(response => {
-                    if (response.ok) {
-                        // Atualiza a página após a conclusão da atualização do rate
-                        window.location.reload();
-                    } else {
-                        console.error('Erro ao atualizar rate:', response.statusText);
+                    if (!response.ok) {
+                        throw new Error('Erro ao atualizar o rate');
                     }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log(data);
                 })
                 .catch(error => {
-                    console.error('Erro ao atualizar rate:', error);
+                    console.error('Erro:', error);
+                    // Reverte a exibição do rate se ocorrer um erro
+                    rateElement.innerText = currentRate;
                 });
             }
         </script>
+        
         
                 
     </div>

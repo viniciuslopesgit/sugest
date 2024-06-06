@@ -13,7 +13,7 @@ Usar authenticação do google para realizar o cadastro do usúario
 
 
     Se for o primeiro login do usuário:
-        Página inicial onde o usuário selecionará em uma lista com 50 sites
+        Página inicial onde o usuário selecionará 5 sites em uma lista com 50 sites
         baseado nos melhores sites com melhor pontuação
             após a seleção
                 sistema incrementa o arquivo .csv
@@ -33,7 +33,10 @@ Usar authenticação do google para realizar o cadastro do usúario
 Associar login do google a conta Google Cloud Plataform
 criar banco de dados:
     db_users
-        users
+        User
+            'id', 'email', 'password', 'name'
+        User_fav
+            'id', 'user_id', 'url', 'rate'
 
 
 

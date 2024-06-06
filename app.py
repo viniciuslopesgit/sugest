@@ -49,7 +49,8 @@ class User_fav(db.Model):
     url = db.Column(db.String(200))
     rate = db.Column(db.Integer)
 
-    def __init__(self, user_id, url, rate):
+    def __init__(self, id, user_id, url, rate):
+        self.id = id
         self.user_id = user_id
         self.url = url
         self.rate = rate
@@ -63,15 +64,21 @@ def generate_news_urls(user_id):
     if existing_urls_count == 5:
         return []
     elif existing_urls_count < 5:
-        news_data = pd.read_csv('data/User_fav.csv')
-        selected_urls = random.sample(news_data['url'].tolist(), 5 - existing_urls_count)
+        news_data = pd.read_csv('data/url_data.csv')
+
+        existing_urls = [fav.url for fav in User_fav.query.filter_by(user_id=user_id).all()]
+        available_urls = news_data[~news_data['url'].isin(existing_urls)]
+
+        selected_urls = random.sample(available_urls.to_dict(orient='records'), 5 - existing_urls_count)
 
         news_list = []
-        for url in selected_urls:
+        for url_data in selected_urls:
+            id = url_data['id']
+            url = url_data['url']
             rate = 0
-            new_url = User_fav(user_id=user_id, url=url, rate=rate)
+            new_url = User_fav(id=id, user_id=user_id, url=url, rate=rate)
             db.session.add(new_url)
-            news_list.append({'user_id': user_id, 'url': url, 'rate': rate})
+            news_list.append({'id': id, 'user_id': user_id, 'url': url, 'rate': rate})
         
         db.session.commit()
 
