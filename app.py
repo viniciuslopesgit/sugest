@@ -43,7 +43,7 @@ class User(db.Model):
             self.password = generate_password_hash(password)
 
 # GERA 5 NOVOS SITES
-class News(db.Model):
+class User_fav(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(50))
     url = db.Column(db.String(200))
@@ -58,18 +58,18 @@ class News(db.Model):
         self.rate += 1
 
 def generate_news_urls(user_id):
-    existing_urls_count = News.query.filter_by(user_id=user_id).count()
+    existing_urls_count = User_fav.query.filter_by(user_id=user_id).count()
 
     if existing_urls_count == 5:
         return []
     elif existing_urls_count < 5:
-        news_data = pd.read_csv('data/news.csv')
+        news_data = pd.read_csv('data/User_fav.csv')
         selected_urls = random.sample(news_data['url'].tolist(), 5 - existing_urls_count)
 
         news_list = []
         for url in selected_urls:
             rate = 0
-            new_url = News(user_id=user_id, url=url, rate=rate)
+            new_url = User_fav(user_id=user_id, url=url, rate=rate)
             db.session.add(new_url)
             news_list.append({'user_id': user_id, 'url': url, 'rate': rate})
         
@@ -120,16 +120,18 @@ def authorize():
         
         # Simulação de um user_id
         session['user_id'] = email.split('@')[0]
-
         print('Usuário autenticado com sucesso:', email)
         return redirect(url_for('dashboard'))
+    
     except Exception as e:
         print('Erro durante a autorização:', e)
-        return redirect('/')
+    
+    return redirect('/')
 
 @app.route('/dashboard')
 def dashboard():
     email = session.get('email')
+    name = session.get('name')
     if email:
         user_id = session.get('user_id')
         
@@ -137,7 +139,7 @@ def dashboard():
         generate_news_urls(user_id)
         
         # Consulta ao banco de dados para recuperar as notícias do usuário atual
-        user_news = News.query.filter_by(user_id=user_id).all()
+        user_news = User_fav.query.filter_by(user_id=user_id).all()
         urls = []
         for news in user_news:
             urls.append({
@@ -145,7 +147,7 @@ def dashboard():
                 'url': news.url,
                 'rate': news.rate
             })
-        return render_template('dashboard.html', email=email, urls=urls)
+        return render_template('dashboard.html', name=name, email=email, urls=urls)
     else:
         return redirect('/')
 
@@ -157,7 +159,7 @@ def update_rate():
         url = request.form.get('url')
         
         # Consulta ao banco de dados para encontrar a notícia correspondente
-        news_item = News.query.filter_by(user_id=user_id, url=url).first()
+        news_item = User_fav.query.filter_by(user_id=user_id, url=url).first()
         
         if news_item:
             # Atualiza o valor de 'rate' no banco de dados
