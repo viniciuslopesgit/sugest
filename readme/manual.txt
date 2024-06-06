@@ -24,7 +24,12 @@ Usar authenticação do google para realizar o cadastro do usúario
         Volta a página dashboard e mostrará os sites recomendados
 
 
+Recolha o id dos sites que estão com o valor de 'rate' igual a 1  no banco de dados (db_users > User_fav) do usuário que está logado
+no site
 
+feito isso o sistema abrirá o meu arquivo url_data.csv
+comparará o id dos sites que estão com o valor de 'rate' igual a 1 e com base nisso
+ele recomendará outros sites para esse usuário
 
 
 

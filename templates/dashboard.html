@@ -20,15 +20,27 @@
     <div id="content">
         <h1>Dashboard</h1>
                 
-        <h2>Notícias Recomendadas</h2>
+        <h2>Favoritos</h2>
+            <ul>
+                {% for item in urls %}
+                    <li>User ID: {{ item.user_id }}, URL: <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ item.url }}</a>
+                        <button onclick="toggleFavorite('{{ item.user_id }}', '{{ item.url }}')">Favorito</button>, Rate: <span id="rate_{{ item.url }}">{{ item.rate }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        <h2>Recomendados</h2>
         <ul>
-            {% for item in urls %}
-                <li>User ID: {{ item.user_id }}, URL: <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ item.url }}</a>
-                    <button onclick="toggleFavorite('{{ item.user_id }}', '{{ item.url }}')">Favorito</button>, Rate: <span id="rate_{{ item.url }}">{{ item.rate }}</span>
+            {% for site in recommend_sites %}
+                <li>
+                    <a href="{{ site.url }}">{{ site.url }}</a> - Similaridade: {{ site.similarity }}
                 </li>
             {% endfor %}
         </ul>
         
+
+
+
+
         
         <script>
             function toggleFavorite(user_id, url) {

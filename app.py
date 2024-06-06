@@ -27,6 +27,8 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid profile email'},
 )
+
+
 # -------------------------------- Funções
 
 # Criando login de usuário com a conta Google
@@ -42,7 +44,7 @@ class User(db.Model):
         if password:
             self.password = generate_password_hash(password)
 
-# GERA 5 NOVOS SITES
+# Sistema de Favorito
 class User_fav(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(50))
@@ -58,6 +60,7 @@ class User_fav(db.Model):
     def update_rate(self):
         self.rate += 1
 
+# Gera 5 sites
 def generate_news_urls(user_id):
     existing_urls_count = User_fav.query.filter_by(user_id=user_id).count()
 
@@ -84,7 +87,57 @@ def generate_news_urls(user_id):
 
         return news_list
 
-# ----------------------- Rotas da sua aplicação
+def jaccard_similarity(set1, set2):
+    intersection = len(set1.intersection(set2))
+    union = len(set1.union(set2))
+    return intersection / union
+
+def recommend_sites_for_user():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        print("Usuário não está logado.")
+        return "Usuário não está logado."
+    
+    # Recolher IDs dos sites com rate igual a 1
+    rated_urls = User_fav.query.filter_by(user_id=user_id, rate=1).all()
+    rated_ids = [url.id for url in rated_urls]
+
+    if not rated_ids:
+        print("Nenhum site está favoritado")
+        return "Nenhum site está favoritado"
+    
+    url_data = pd.read_csv('data/url_data.csv')
+    rated_sites_data = url_data[url_data['id'].isin(rated_ids)]
+
+    if rated_sites_data.empty:
+        print("Nenhum dado correspondente encontrado no arquivo .csv")
+        return "Nenhum dado correspondente encontrado no arquivo .csv"
+    
+    rated_keywords = set()
+    for keywords in rated_sites_data['keywords']:
+        if isinstance(keywords, str):
+            rated_keywords.update(keywords.split(','))
+
+    recommendations = []
+    for index, row in url_data.iterrows():
+        if row['id'] not in rated_ids:
+            if isinstance(row['keywords'], str):
+                site_keywords = set(row['keywords'].split(','))
+                similarity = jaccard_similarity(rated_keywords, site_keywords)
+                recommendations.append((row['id'], row['url'], similarity))
+
+    # Ordenar as recomendações pela maior similaridade
+    recommendations.sort(key=lambda x: x[2], reverse=True)
+
+    top_recommendations = recommendations[:5]
+
+    return [{'id': rec[0], 'url': rec[1], 'similarity': rec[2]} for rec in top_recommendations]
+
+
+
+# ----------------------- Rotas 
+
 @app.route('/')
 def index():
     email = session.get('email')
@@ -154,33 +207,38 @@ def dashboard():
                 'url': news.url,
                 'rate': news.rate
             })
-        return render_template('dashboard.html', name=name, email=email, urls=urls)
+        
+        recommend_sites = recommend_sites_for_user()
+        print(recommend_sites_for_user())
+
+        return render_template('dashboard.html', name=name, email=email, urls=urls, recommend_sites=recommend_sites)
     else:
         return redirect('/')
 
 
 @app.route('/update_rate', methods=['POST'])
 def update_rate():
-    if request.method == 'POST':
-        user_id = request.form.get('user_id')
-        url = request.form.get('url')
-        
-        # Consulta ao banco de dados para encontrar a notícia correspondente
-        news_item = User_fav.query.filter_by(user_id=user_id, url=url).first()
-        
-        if news_item:
-            # Atualiza o valor de 'rate' no banco de dados
-            news_item.rate += 1
-            db.session.commit()
-            
-            return 'Rate atualizado com sucesso!'
-        else:
-            return 'Notícia não encontrada para o usuário especificado.'
+    data = request.get_json()
+    user_id = data.get('user_id')
+    url = data.get('url')
+    rate = data.get('rate')
 
-    return 'Método inválido.'
+    # Consulta ao banco de dados para encontrar a notícia correspondente
+    news_item = User_fav.query.filter_by(user_id=user_id, url=url).first()
+    
+    if news_item:
+        # Atualiza o valor de 'rate' no banco de dados
+        news_item.rate = rate
+        db.session.commit()
+        return 'Rate atualizado com sucesso!'
+    else:
+        return 'Notícia não encontrada para o usuário especificado.', 404
+
+    return 'Método inválido.', 400
 
 
 
+# ----------------- Inicializa a aplicação no server
 
 if __name__ == '__main__':
     app.run(debug=True)
