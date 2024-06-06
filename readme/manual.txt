@@ -2,6 +2,31 @@
 
 Fazer:
 
+Opção de favoritos 
+Almentar número de sites que serão gerados a primeira visita
+o usúario poderá fechar a aba essim o site receberá -1 no rate geral
+
+Criar busca:
+    Insira o seu link e te recomendaremos mais sites parecidos
+        o sistema verificará
+            se o link é válido
+                se sim 
+                    verifica se tem esse link no arquivo .csv
+                        se sim
+                            recomenda sites
+                        se não tiver
+                            ele armazenará o link ao arquivo.csv
+                            e recomenda links parecidos com esse
+
+
+Sempre que a página atualizar
+    sistema de recomendação recomendará novas páginas por recomendação + mesclado a páginas random
+        50 serão recomendadas
+        10 serão random
+
+
+
+
 Usar authenticação do google para realizar o cadastro do usúario
     se for o primeiro acesso do usuário ao site
         salve na coluna 'users' no banco de dados
@@ -22,6 +47,17 @@ Usar authenticação do google para realizar o cadastro do usúario
             recomenda 50 sites baseado no seu gosto
         
         Volta a página dashboard e mostrará os sites recomendados
+
+        Sempre que o usuário favoritar um link
+            salva link nos favoritos
+            sistema irá buscar o 'id' deste arqui na lista .csv
+            incrementa o 'rate' da coluna 'rate' em +1 dessa página no csv
+            salvo arquivo.csv
+        Se Não
+            retira o decresce o 'rate' em -1
+
+            Extrair dados do navegador do usuário
+
 
 
 Recolha o id dos sites que estão com o valor de 'rate' igual a 1  no banco de dados (db_users > User_fav) do usuário que está logado
