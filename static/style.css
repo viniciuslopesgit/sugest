@@ -52,19 +52,42 @@ body {
     height: 80px;
     width: 80px;
     display: flex;
-    margin-right: 10px;
-    margin-bottom: 10px; /* Adicionado para adicionar espaço entre as linhas */
-    padding: 10px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-top: 20px;
     border-radius: 10px;
     align-items: center; /* Alinha o conteúdo verticalmente ao centro */
-    background-color: #ededed;
+    background-color: #c0c0c0;
 }
 
 .item_fav a {
+    align-items: center;
     text-decoration: none;
-    color: black; /* Alterado para preto para maior legibilidade */
+    color: black;
     font-size: 14px;
-    margin-top: 10px; /* Adicionado para alinhar o texto verticalmente */
+    height: 100%;
+    width: 100%;
+    /* border: 1px solid black; */
+}
+
+.truncate {
+    display: inline-block; /* Garante que o link se comporte como um bloco inline */
+    width: 80px;
+    text-align: center; /* Alinha o texto ao centro */
+    text-decoration: none; /* Remove o sublinhado padrão do link */
+    overflow: hidden; /* Esconde o conteúdo que excede as duas linhas */
+}
+
+.truncate div {
+    font-size: 14px;
+    color: #000;
+    display: -webkit-box; /* Permite controle de layout usando caixas flexíveis */
+    -webkit-line-clamp: 2; /* Limita o texto a duas linhas */
+    -webkit-box-orient: vertical; /* Orientação vertical das linhas */
+    overflow: hidden; /* Esconde o conteúdo que excede as duas linhas */
+    text-overflow: ellipsis; /* Adiciona reticências ao texto truncado */
+    max-height: 2.5em; /* Altura máxima para duas linhas de texto */
+    line-height: 1.25em; /* Altura da linha */
 }
 
 .item_fav button {

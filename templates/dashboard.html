@@ -31,9 +31,14 @@
         <h2>Recomendados</h2>
         <ul id="user_fav">
             {% for site in recommend_sites %}
-                <li class="item_fav">
-                    <a href="{{ site.url }}"> {{ site.name }} </a> <!-- {{ site.similarity }} -->
-                </li>
+                <div id="rec_box">
+                    <li class="item_fav" style="background-image: url('https://s2.googleusercontent.com/s2/favicons?domain={{ site.url }}&sz=180'); background-size: cover;">
+                        <a href="{{ site.url }}"></a> <!-- {{ site.similarity }} -->
+                    </li>
+                    <a href="{{ site.url }}" class="truncate">
+                        <div>{{ site.name }}</div>
+                    </a> <!-- {{ site.similarity }} -->
+                </div>
             {% endfor %}
         </ul>
         
