@@ -1,5 +1,6 @@
 import pandas as pd
 import random
+import psycopg2
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 from flask import jsonify
@@ -7,19 +8,19 @@ from flask import Flask, redirect, url_for, session, render_template, request, j
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
 from bs4 import BeautifulSoup
+from sqlalchemy import create_engine
+
 app = Flask(__name__)
 
-app.secret_key = 'seu_segredo'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://viniciuslopes:@localhost/db_sugest'
-
 db = SQLAlchemy(app)
 
+app.secret_key = 'seu_segredo'
 app.config['GOOGLE_CLIENT_ID'] = '213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com'
 app.config['GOOGLE_CLIENT_SECRET'] = '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'
 
 oauth = OAuth(app)
-
 google = oauth.register(
     name='google',
     client_id='213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com',
@@ -66,7 +67,7 @@ def generate_news_urls(user_id):
     if existing_urls_count == 5:
         return []
     elif existing_urls_count < 5:
-        news_data = pd.read_csv('data/url_data.csv')
+        news_data = pd.read_sql(db.session.query(User_fav.id, User_fav.url))
 
         existing_urls = [fav.url for fav in User_fav.query.filter_by(user_id=user_id).all()]
         available_urls = news_data[~news_data['url'].isin(existing_urls)]
@@ -106,8 +107,13 @@ def recommend_sites_for_user():
         print("Nenhum site está favoritado")
         return "Nenhum site está favoritado"
     
-    url_data = pd.read_csv('data/url_data.csv')
+    engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
+
+    query = "SELECT id, name, url, keywords FROM url_data"
+    url_data = pd.read_sql(query, con=engine)
+
     rated_sites_data = url_data[url_data['id'].isin(rated_ids)]
+
 
     if rated_sites_data.empty:
         print("Nenhum dado correspondente encontrado no arquivo .csv")
