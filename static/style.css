@@ -52,15 +52,16 @@ body {
     height: 80px;
     width: 80px;
     display: flex;
-    margin-right: 20px;
+    margin-right: 50px;
     margin-bottom: 20px;
     margin-top: 20px;
     border-radius: 10px;
     align-items: center; /* Alinha o conteúdo verticalmente ao centro */
-    background-color: #c0c0c0;
+    border: 1px solid rgb(199, 199, 199);
 }
 
 .item_fav a {
+    padding-top: 0;
     align-items: center;
     text-decoration: none;
     color: black;
@@ -71,6 +72,8 @@ body {
 }
 
 .truncate {
+    vertical-align: top;
+    margin-top: -10px;
     display: inline-block; /* Garante que o link se comporte como um bloco inline */
     width: 80px;
     text-align: center; /* Alinha o texto ao centro */
@@ -79,7 +82,7 @@ body {
 }
 
 .truncate div {
-    font-size: 14px;
+    font-size: 13px;
     color: #000;
     display: -webkit-box; /* Permite controle de layout usando caixas flexíveis */
     -webkit-line-clamp: 2; /* Limita o texto a duas linhas */
@@ -105,4 +108,41 @@ body {
 }
 .login-button:hover {
     background-color: #357ae8;
+}
+
+#iframe_container {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    max-width: 768px;
+    max-height: 600px;
+    margin-top: 20px;
+    background-color: #e9e9e9;
+    z-index: 1000; 
+}
+
+#site_iframe {
+    width: 100%;
+    height: 100%;
+}
+
+#iframeBackground {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:1;
+    display:none;
+    background-color: white;
+    opacity: 95%;
+}
+@media only screen and (max-width: 768px) {
+    #content {
+        padding: 60px 20px 0 20px;
+    }
 }

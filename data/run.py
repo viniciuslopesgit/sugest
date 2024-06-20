@@ -1,19 +1,17 @@
 import pandas as pd
 
-# Função para verificar se a URL é de um motor de busca
-def is_search_engine(url):
-    search_engines = [
-        "google.", "bing.", "yahoo.", "baidu.", "duckduckgo.", "yandex.", "ask.", "aol."
-    ]
-    return any(engine in url for engine in search_engines)
+# Passo 1: Ler o arquivo CSV
+file_path = 'url_data.csv'  # Substitua pelo caminho do seu arquivo
+df = pd.read_csv(file_path)
 
-# Carrega o arquivo CSV
-df = pd.read_csv("url_data.csv")
+# Passo 2: Identificar as colunas que contêm 'location', 'timezone' e 'language'
+cols_to_remove = [col for col in df.columns if any(keyword in col.lower() for keyword in ['location', 'timezone', 'language'])]
 
-# Filtra as linhas, mantendo apenas aquelas cujas URLs não são de motores de busca
-df_filtered = df[~df['url'].apply(is_search_engine)]
+# Passo 3: Remover essas colunas
+df_cleaned = df.drop(columns=cols_to_remove)
 
-# Salva o DataFrame filtrado de volta no arquivo CSV
-df_filtered.to_csv("url_data_filtered.csv", index=False)
+# Passo 4: Salvar o novo arquivo CSV
+df_cleaned.to_csv('url_data_cleaned.csv', index=False)
 
-print("Linhas com URLs de motores de busca foram removidas e o novo arquivo foi salvo como 'url_data_filtered.csv'.")
+print("As colunas foram removidas e o arquivo foi salvo como 'url_data_cleaned.csv'.")
+

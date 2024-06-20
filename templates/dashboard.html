@@ -8,6 +8,7 @@
     <title>Dashboard</title>
 </head>
 <body>
+    <div id="iframeBackground"></div>
     <div id="header">
         <div id="logo">
             <a style="font-size: 22px; font-family: 'Times New Roman', Times, serif;"><i><b>unS</i>ugest</b></a>
@@ -33,7 +34,7 @@
             {% for site in recommend_sites %}
                 <div id="rec_box">
                     <li class="item_fav" style="background-image: url('https://s2.googleusercontent.com/s2/favicons?domain={{ site.url }}&sz=180'); background-size: cover;">
-                        <a href="{{ site.url }}"></a> <!-- {{ site.similarity }} -->
+                        <a href="{{ site.url }}"onclick="openIframe('{{ site.url }}'); return false;"></a>
                     </li>
                     <a href="{{ site.url }}" class="truncate">
                         <div>{{ site.name }}</div>
@@ -42,8 +43,33 @@
             {% endfor %}
         </ul>
         
+        <div id="iframe_container">
+            <iframe id="site_iframe" frameborder="0" scrolling="auto"></iframe>
+        </div>
+        <script>
+            function openIframe(url) {
+                var iframe = document.getElementById('site_iframe');
+                iframe.src = url;
+                
+                var iframeContainer = document.getElementById('iframe_container');
+                iframeContainer.style.display = 'block';
 
-
+                var iframeBackground = document.getElementById('iframeBackground');
+                iframeBackground.style.display = 'block';
+            }
+    
+            document.getElementById('iframeBackground').addEventListener('click', function() {
+                var iframeContainer = document.getElementById('iframe_container');
+                iframeContainer.style.display = 'none';
+                
+                var iframe = document.getElementById('site_iframe');
+                iframe.src = '';
+    
+                // Também tornar o iframeBackground invisível
+                var iframeBackground = document.getElementById('iframeBackground');
+                iframeBackground.style.display = 'none';
+            });
+        </script>
 
 
         
