@@ -56,6 +56,8 @@
 
                 var iframeBackground = document.getElementById('iframeBackground');
                 iframeBackground.style.display = 'block';
+
+                document.body.classList.add('no-scroll');
             }
     
             document.getElementById('iframeBackground').addEventListener('click', function() {
@@ -68,6 +70,8 @@
                 // Também tornar o iframeBackground invisível
                 var iframeBackground = document.getElementById('iframeBackground');
                 iframeBackground.style.display = 'none';
+
+                document.body.classList.remove('no-scroll');
             });
         </script>
 

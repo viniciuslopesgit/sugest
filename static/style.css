@@ -4,6 +4,10 @@ body {
     margin: 0; /* Adicionado para remover margens padrão */
 }
 
+.no-scroll {
+    overflow: hidden;
+}
+
 #header {
     top: 0;
     height: 60px;
