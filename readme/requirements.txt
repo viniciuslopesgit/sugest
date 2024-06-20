@@ -4,10 +4,7 @@ requests
 numpy
 pandas
 scikit-learn
-mysql-connector-python
-mysql-connector-python-rf 
 flask_sqlalchemy
-pymysql
 beautifulsoup4 
 newspaper3k 
 sumy

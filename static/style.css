@@ -14,18 +14,18 @@ body {
     width: 100%;
     position: fixed; /* Alterado para posição fixa para que o cabeçalho permaneça fixo na parte superior */
     background-color: #fff;
-    border-bottom: 1px solid rgb(236, 236, 236);
+    border-bottom: 1px solid rgb(35, 35, 35);
     z-index: 1000; /* Adicionado z-index para garantir que o cabeçalho esteja acima de outros elementos */
 }
 #logo {
     padding: 15px;
-    padding-left: 40px;
+    padding-left: 80px;
 }
 #user {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    right: 40px;
+    float: right;
+    display: -webkit-inline-flex;
+    padding-right: 80px;
+    margin-top: -30px;
 }
 
 #user a {
@@ -61,7 +61,7 @@ body {
     margin-top: 20px;
     border-radius: 10px;
     align-items: center; /* Alinha o conteúdo verticalmente ao centro */
-    border: 1px solid rgb(199, 199, 199);
+    border: 1px solid rgb(35, 35, 35);
 }
 
 .item_fav a {
@@ -126,6 +126,7 @@ body {
     max-height: 600px;
     margin-top: 20px;
     background-color: #e9e9e9;
+    border: 1px solid rgb(35, 35, 35);
     z-index: 1000; 
 }
 
