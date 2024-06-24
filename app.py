@@ -8,7 +8,7 @@ from flask import Flask, redirect, url_for, session, render_template, request, j
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
 from bs4 import BeautifulSoup
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 app = Flask(__name__)
 
@@ -109,28 +109,28 @@ def recommend_sites_for_user():
     
     engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
 
-    query = "SELECT id, name, url, keywords FROM url_data"
+    query = "SELECT id, name, url, description FROM url_data"
     url_data = pd.read_sql(query, con=engine)
 
     rated_sites_data = url_data[url_data['id'].isin(rated_ids)]
 
 
     if rated_sites_data.empty:
-        print("Nenhum dado correspondente encontrado no arquivo .csv")
-        return "Nenhum dado correspondente encontrado no arquivo .csv"
+        print("Nenhum dado correspondente encontrado no arquivo")
+        return "Nenhum dado correspondente encontrado no arquivo"
     
     rated_keywords = set()
-    for keywords in rated_sites_data['keywords']:
-        if isinstance(keywords, str):
-            rated_keywords.update(keywords.split(','))
+    for description in rated_sites_data['description']:
+        if isinstance(description, str):
+            rated_keywords.update(description.split(','))
 
     recommendations = []
     site_info = {}
     for index, row in url_data.iterrows():
         site_info[row['id']] = {'name': row['name'], 'url': row['url']}
         if row['id'] not in rated_ids:
-            if isinstance(row['keywords'], str):
-                site_keywords = set(row['keywords'].split(','))
+            if isinstance(row['description'], str):
+                site_keywords = set(row['description'].split(','))
                 similarity = jaccard_similarity(rated_keywords, site_keywords)
                 recommendations.append((row['id'], similarity))
 
@@ -152,23 +152,18 @@ def recommend_sites_for_user():
 
     return result
 
-def load_url_names_from_csv():
+def load_url_names_from_database():
     url_names = {}
     try:
-        df = pd.read_csv('data/url_data.csv')
-
         for index, row in df.iterrows():
             url_names[int(row['id'])] = row['name']
     except FileNotFoundError:
-        print("Arquivo data_url.csv não encontrado")
+        print("Arquivo não encontrado data_url_DATABSE")
     except Exception as e:
-        print("Erro ao ler o arquivo data.url.csv")
+        print("Erro ao ler o arquivo data_url_DATABSE")
     return url_names
 
-def generate_random_color():
-    # Gera uma cor aleatória em formato hexadecimal
-    color = '#{:06x}'.format(random.randint(0, 0xFFFFFF))
-    return color
+
 
 
 # ----------------------------------- ROTAS --------------------------------------#
@@ -248,7 +243,7 @@ def dashboard():
         recommend_sites = recommend_sites_for_user()
         print(recommend_sites_for_user())
 
-        url_names = load_url_names_from_csv()
+        url_names = load_url_names_from_database()
 
         return render_template('dashboard.html', name=name, email=email, urls=urls, recommend_sites=recommend_sites, url_names=url_names)
     else:

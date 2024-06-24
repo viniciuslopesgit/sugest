@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
@@ -19,106 +18,154 @@
         </div>
     </div>
     <div id="content">
-        <h1>Dashboard</h1>
-                
-        <h2>Favoritos</h2>
-            <ul id="user_fav">
-                {% for item in urls %}
-                    <li class="item_fav"><!--User ID: {{ item.user_id }}, URL:--> <a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ url_names[item.id] }} </a>
-                        <button onclick="toggleFavorite('{{ item.user_id }}', '{{ item.url }}')">Favorito</button><span  id="rate_{{ item.url }}">{{ item.rate }}</span>
-                    </li>
+        <div id="user_fav_container">
+            <div id="tags_filter">
+                <form action="/pesquisar" method="GET">
+                    <input type="text" id="search_query" name="q" placeholder="Search">
+                </form>
+            </div>
+            <!--
+            <h2>Favoritos</h2>
+                <ul id="user_fav">
+                    {% for item in urls %}
+                        <li class="item_fav"><a href="{{ item.url }}" onclick="updateRate('{{ item.user_id }}', '{{ item.url }}')">{{ url_names[item.id] }} </a>
+                            <button onclick="toggleFavorite('{{ item.user_id }}', '{{ item.url }}')">Favorito</button><span  id="rate_{{ item.url }}">{{ item.rate }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            -->
+            <div id="user_fav">
+                {% for site in recommend_sites %}
+                    <div id="rec_box">
+                        <li class="item_fav" style="background-image: url('https://s2.googleusercontent.com/s2/favicons?domain={{ site.url }}&sz=180'); background-size: cover;">
+                            <a href="{{ site.url }}"onclick="openIframe('{{ site.url }}'); return false;"></a>
+                        </li>
+                        <a href="{{ site.url }}" class="truncate">
+                            <div>{{ site.name }}</div>
+                        </a> <!-- {{ site.similarity }} -->
+                    </div>
                 {% endfor %}
-            </ul>
-        <h2>Recomendados</h2>
-        <ul id="user_fav">
-            {% for site in recommend_sites %}
-                <div id="rec_box">
-                    <li class="item_fav" style="background-image: url('https://s2.googleusercontent.com/s2/favicons?domain={{ site.url }}&sz=180'); background-size: cover;">
-                        <a href="{{ site.url }}"onclick="openIframe('{{ site.url }}'); return false;"></a>
-                    </li>
-                    <a href="{{ site.url }}" class="truncate">
-                        <div>{{ site.name }}</div>
-                    </a> <!-- {{ site.similarity }} -->
-                </div>
-            {% endfor %}
-        </ul>
-        
+            </div>
+        </div>
+        <div id="news_update">
+            <div id="news_content">
+                <h1>News</h1>
+                    <div id="news_box">
+                        <div class="news_news">
+                            <h1>Lula se encontra com FHC em São Paulo</h1>
+                            <p class="notice_truncade">
+                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
+                            </p>
+
+                            <h1>Lula se encontra com FHC em São Paulo</h1>
+                            <p class="notice_truncade">
+                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
+                            </p>
+
+                            <h1>Lula se encontra com FHC em São Paulo</h1>
+                            <p class="notice_truncade">
+                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
+                            </p>
+
+                            <h1>Lula se encontra com FHC em São Paulo</h1>
+                            <p class="notice_truncade">
+                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
+                            </p>
+
+                            <h1>Lula se encontra com FHC em São Paulo</h1>
+                            <p class="notice_truncade">
+                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
+                            </p>
+
+                            <h1>Lula se encontra com FHC em São Paulo</h1>
+                            <p class="notice_truncade">
+                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
+                            </p>
+
+                            <h1>Lula se encontra com FHC em São Paulo</h1>
+                            <p class="notice_truncade">
+                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
+                            </p>
+
+                            <h1>Lula se encontra com FHC em São Paulo</h1>
+                            <p class="notice_truncade">
+                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
+                            </p>
+                        </div>
+                    </div>
+            </div>
+        </div>
+
         <div id="iframe_container">
             <iframe id="site_iframe" frameborder="0" scrolling="auto"></iframe>
         </div>
-        <script>
-            function openIframe(url) {
-                var iframe = document.getElementById('site_iframe');
-                iframe.src = url;
-                
-                var iframeContainer = document.getElementById('iframe_container');
-                iframeContainer.style.display = 'block';
-
-                var iframeBackground = document.getElementById('iframeBackground');
-                iframeBackground.style.display = 'block';
-
-                document.body.classList.add('no-scroll');
-            }
-    
-            document.getElementById('iframeBackground').addEventListener('click', function() {
-                var iframeContainer = document.getElementById('iframe_container');
-                iframeContainer.style.display = 'none';
-                
-                var iframe = document.getElementById('site_iframe');
-                iframe.src = '';
-    
-                // Também tornar o iframeBackground invisível
-                var iframeBackground = document.getElementById('iframeBackground');
-                iframeBackground.style.display = 'none';
-
-                document.body.classList.remove('no-scroll');
-            });
-        </script>
-
-
-        
-        <script>
-            function toggleFavorite(user_id, url) {
-                var rateElement = document.getElementById('rate_' + url);
-                var currentRate = parseInt(rateElement.innerText);
-                var newRate = currentRate === 0 ? 1 : 0;
-        
-                // Atualiza a exibição do rate imediatamente
-                rateElement.innerText = newRate;
-        
-                // Envia uma requisição POST para atualizar o rate no servidor
-                fetch('/update_rate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        user_id: user_id,
-                        url: url,
-                        rate: newRate
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erro ao atualizar o rate');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    console.log(data);
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    // Reverte a exibição do rate se ocorrer um erro
-                    rateElement.innerText = currentRate;
-                });
-            }
-        </script>
-        
-        
-                
     </div>
+
+
+    <script>
+        function openIframe(url) {
+            var iframe = document.getElementById('site_iframe');
+            iframe.src = url;
+            
+            var iframeContainer = document.getElementById('iframe_container');
+            iframeContainer.style.display = 'block';
+
+            var iframeBackground = document.getElementById('iframeBackground');
+            iframeBackground.style.display = 'block';
+
+            document.body.classList.add('no-scroll');
+        }
+
+        document.getElementById('iframeBackground').addEventListener('click', function() {
+            var iframeContainer = document.getElementById('iframe_container');
+            iframeContainer.style.display = 'none';
+            
+            var iframe = document.getElementById('site_iframe');
+            iframe.src = '';
+
+            // Também tornar o iframeBackground invisível
+            var iframeBackground = document.getElementById('iframeBackground');
+            iframeBackground.style.display = 'none';
+
+            document.body.classList.remove('no-scroll');
+        });
+    </script>
+    <script>
+        function toggleFavorite(user_id, url) {
+            var rateElement = document.getElementById('rate_' + url);
+            var currentRate = parseInt(rateElement.innerText);
+            var newRate = currentRate === 0 ? 1 : 0;
     
+            // Atualiza a exibição do rate imediatamente
+            rateElement.innerText = newRate;
     
+            // Envia uma requisição POST para atualizar o rate no servidor
+            fetch('/update_rate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: user_id,
+                    url: url,
+                    rate: newRate
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao atualizar o rate');
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                // Reverte a exibição do rate se ocorrer um erro
+                rateElement.innerText = currentRate;
+            });
+        }
+    </script>
 </body>
 </html>

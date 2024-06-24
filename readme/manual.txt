@@ -2,13 +2,12 @@
 
 Fazer:
 
-Adicionar na tabela
-    descrição de cada site
-    link para cada favicon
-    timestamp
-    pais
-
-
+Página de boas vindas
+    O usuário é obrigado a selecionar 3 sites
+        O sistema criará uma tabela com o nome  'fav_/*user_id*'
+            adicionará 1000 sites com base no gosto do usuário 
+                a cada refresh da página 'dashboard.html'
+                    chamrará a função que analisará os favoritos do usuário
 
 
 
@@ -48,7 +47,7 @@ Usar authenticação do google para realizar o cadastro do usúario
 
 
     Se for o primeiro login do usuário:
-        Página inicial onde o usuário selecionará 5 sites em uma lista com 50 sites
+        Página inicial onde o usuário selecionará 3 sites em uma lista com 50 sites, tendo a opção de buscar
         baseado nos melhores sites com melhor pontuação
             após a seleção
                 sistema incrementa o arquivo .csv
@@ -58,24 +57,8 @@ Usar authenticação do google para realizar o cadastro do usúario
         
         Volta a página dashboard e mostrará os sites recomendados
 
-        Sempre que o usuário favoritar um link
-            salva link nos favoritos
-            sistema irá buscar o 'id' deste arqui na lista .csv
-            incrementa o 'rate' da coluna 'rate' em +1 dessa página no csv
-            salvo arquivo.csv
-        Se Não
-            retira o decresce o 'rate' em -1
-
-            Extrair dados do navegador do usuário
 
 
-
-Recolha o id dos sites que estão com o valor de 'rate' igual a 1  no banco de dados (db_users > User_fav) do usuário que está logado
-no site
-
-feito isso o sistema abrirá o meu arquivo url_data.csv
-comparará o id dos sites que estão com o valor de 'rate' igual a 1 e com base nisso
-ele recomendará outros sites para esse usuário
 
 
 
@@ -161,8 +144,8 @@ Análise Agregada: Utilize dados anonimizados ou agregados para análises e ins
 
 
 
-1. Instalação do mySQL
-2. Login como root, sem senha
+1. Instalação do postgreSQL
+2. Login como admin_sugest, senha Spellsinger123!
 3. Criar tabelas:
 
 
