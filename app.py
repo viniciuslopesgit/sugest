@@ -1,16 +1,17 @@
 import pandas as pd
 import random
 import psycopg2
+import requests
 from werkzeug.security import generate_password_hash
 from datetime import datetime
-from flask import jsonify
 from flask import Flask, redirect, url_for, session, render_template, request, jsonify
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
 from bs4 import BeautifulSoup
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, func
 
 app = Flask(__name__)
+
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://viniciuslopes:@localhost/db_sugest'
@@ -45,47 +46,42 @@ class User(db.Model):
         if password:
             self.password = generate_password_hash(password)
 
-# Sistema de Favorito
 class User_fav(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(50))
-    url = db.Column(db.String(200))
+    name = db.Column(db.String(100))
+    url = db.Column(db.String(255))
     rate = db.Column(db.Integer)
 
-    def __init__(self, id, user_id, url, rate):
-        self.id = id
+    def __init__(self, user_id, name, url, rate):
         self.user_id = user_id
+        self.name = name
         self.url = url
         self.rate = rate
 
     def update_rate(self):
         self.rate += 1
 
-def generate_news_urls(user_id):
-    existing_urls_count = User_fav.query.filter_by(user_id=user_id).count()
+def insert_initial_user_favs(user_id):
+    # Verifica se já existem favoritos para este usuário
+    existing_count = User_fav.query.filter_by(user_id=user_id).count()
+    if existing_count > 0:
+        return
+    
+    # Seleciona aleatoriamente 5 URLs da tabela url_data
+    engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
+    query = "SELECT id, name, url FROM url_data ORDER BY random() LIMIT 5"
+    url_data = pd.read_sql(query, con=engine)
 
-    if existing_urls_count == 5:
-        return []
-    elif existing_urls_count < 5:
-        news_data = pd.read_sql(db.session.query(User_fav.id, User_fav.url))
+    for _, row in url_data.iterrows():
+        name = row['name']
+        url = row['url']
+        rate = 1
+        new_fav = User_fav(user_id=user_id, name=name, url=url, rate=rate)
+        db.session.add(new_fav)
+    
+    db.session.commit()
 
-        existing_urls = [fav.url for fav in User_fav.query.filter_by(user_id=user_id).all()]
-        available_urls = news_data[~news_data['url'].isin(existing_urls)]
-
-        selected_urls = random.sample(available_urls.to_dict(orient='records'), 5 - existing_urls_count)
-
-        news_list = []
-        for url_data in selected_urls:
-            id = url_data['id']
-            url = url_data['url']
-            rate = 0
-            new_url = User_fav(id=id, user_id=user_id, url=url, rate=rate)
-            db.session.add(new_url)
-            news_list.append({'id': id, 'user_id': user_id, 'url': url, 'rate': rate})
-        
-        db.session.commit()
-
-        return news_list
 
 def jaccard_similarity(set1, set2):
     intersection = len(set1.intersection(set2))
@@ -137,7 +133,7 @@ def recommend_sites_for_user():
     # Ordenar as recomendações pela maior similaridade
     recommendations.sort(key=lambda x: x[1], reverse=True)
 
-    top_recommendations = recommendations[:100]
+    top_recommendations = recommendations[:50]
 
     # Adicionar informações de nome e URL aos resultados
     result = []
@@ -152,7 +148,7 @@ def recommend_sites_for_user():
 
     return result
 
-def load_url_names_from_database():
+def load_url_names_from_database(df):
     url_names = {}
     try:
         for index, row in df.iterrows():
@@ -160,10 +156,8 @@ def load_url_names_from_database():
     except FileNotFoundError:
         print("Arquivo não encontrado data_url_DATABSE")
     except Exception as e:
-        print("Erro ao ler o arquivo data_url_DATABSE")
+        print("Erro ao ler o arquivo data_url_DATABASE:", str(e))  # Imprime o erro específico
     return url_names
-
-
 
 
 # ----------------------------------- ROTAS --------------------------------------#
@@ -208,6 +202,10 @@ def authorize():
                 new_user = User(email=email, name=name)
                 db.session.add(new_user)
                 db.session.commit()
+
+                # Insere URLs favoritas iniciais para o novo usuário
+                user_id = email.split('@')[0]
+                insert_initial_user_favs(user_id)
         
         # Simulação de um user_id
         session['user_id'] = email.split('@')[0]
@@ -226,28 +224,31 @@ def dashboard():
     if email:
         user_id = session.get('user_id')
         
-        # Gere URLs de notícias se necessário
-        generate_news_urls(user_id)
-        
         # Consulta ao banco de dados para recuperar as notícias do usuário atual
-        user_news = User_fav.query.filter_by(user_id=user_id).all()
+        user_news = User_fav.query.filter_by(user_id=user_id).order_by(func.random()).limit(5).all()
         urls = []
         for news in user_news:
             urls.append({
                 'id': news.id,
                 'user_id': news.user_id,
+                'name': news.name,
                 'url': news.url,
                 'rate': news.rate
             })
-        
-        recommend_sites = recommend_sites_for_user()
-        print(recommend_sites_for_user())
 
-        url_names = load_url_names_from_database()
+        recommend_sites = recommend_sites_for_user()
+
+        # Seleciona novamente os dados das URLs para este usuário
+        engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
+        query = "SELECT id, name, url, description FROM url_data"
+        url_data = pd.read_sql(query, con=engine)
+
+        url_names = load_url_names_from_database(url_data)
 
         return render_template('dashboard.html', name=name, email=email, urls=urls, recommend_sites=recommend_sites, url_names=url_names)
     else:
         return redirect('/')
+
 
 
 @app.route('/update_rate', methods=['POST'])

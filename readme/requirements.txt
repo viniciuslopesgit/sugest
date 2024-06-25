@@ -9,3 +9,4 @@ beautifulsoup4
 newspaper3k 
 sumy
 lxml_html_clean
+newspaper3k

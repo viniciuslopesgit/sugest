@@ -34,6 +34,7 @@
                     {% endfor %}
                 </ul>
             -->
+            
             <div id="user_fav">
                 {% for site in recommend_sites %}
                     <div id="rec_box">
@@ -49,48 +50,14 @@
         </div>
         <div id="news_update">
             <div id="news_content">
-                <h1>News</h1>
+                <h1>Favorites</h1>
                     <div id="news_box">
                         <div class="news_news">
-                            <h1>Lula se encontra com FHC em São Paulo</h1>
-                            <p class="notice_truncade">
-                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
-                            </p>
-
-                            <h1>Lula se encontra com FHC em São Paulo</h1>
-                            <p class="notice_truncade">
-                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
-                            </p>
-
-                            <h1>Lula se encontra com FHC em São Paulo</h1>
-                            <p class="notice_truncade">
-                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
-                            </p>
-
-                            <h1>Lula se encontra com FHC em São Paulo</h1>
-                            <p class="notice_truncade">
-                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
-                            </p>
-
-                            <h1>Lula se encontra com FHC em São Paulo</h1>
-                            <p class="notice_truncade">
-                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
-                            </p>
-
-                            <h1>Lula se encontra com FHC em São Paulo</h1>
-                            <p class="notice_truncade">
-                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
-                            </p>
-
-                            <h1>Lula se encontra com FHC em São Paulo</h1>
-                            <p class="notice_truncade">
-                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
-                            </p>
-
-                            <h1>Lula se encontra com FHC em São Paulo</h1>
-                            <p class="notice_truncade">
-                                O ex-presidente recebeu economistas que participaram da elaboração do Plano Real nesta segunda-feira (24). Lula também se reuniu com o linguista Noam Chomsky.
-                            </p>
+                            {% for news in urls %}
+                            <li>
+                                <a href="{{ news.url }}" >{{ news.name }}</a>
+                            </li>
+                            {% endfor %}
                         </div>
                     </div>
             </div>
@@ -100,7 +67,6 @@
             <iframe id="site_iframe" frameborder="0" scrolling="auto"></iframe>
         </div>
     </div>
-
 
     <script>
         function openIframe(url) {
@@ -129,16 +95,15 @@
 
             document.body.classList.remove('no-scroll');
         });
-    </script>
-    <script>
+
         function toggleFavorite(user_id, url) {
             var rateElement = document.getElementById('rate_' + url);
             var currentRate = parseInt(rateElement.innerText);
             var newRate = currentRate === 0 ? 1 : 0;
-    
+
             // Atualiza a exibição do rate imediatamente
             rateElement.innerText = newRate;
-    
+
             // Envia uma requisição POST para atualizar o rate no servidor
             fetch('/update_rate', {
                 method: 'POST',
@@ -167,5 +132,6 @@
             });
         }
     </script>
+    
 </body>
 </html>
