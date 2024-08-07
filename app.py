@@ -1,26 +1,26 @@
+from flask import Flask, redirect, url_for, session, render_template, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from authlib.integrations.flask_client import OAuth
+from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
+from datetime import datetime
+from bs4 import BeautifulSoup
+from sqlalchemy import create_engine, text, func
 import pandas as pd
 import random
 import psycopg2
 import requests
-from werkzeug.security import generate_password_hash
-from datetime import datetime
-from flask import Flask, redirect, url_for, session, render_template, request, jsonify
-from authlib.integrations.flask_client import OAuth
-from flask_sqlalchemy import SQLAlchemy
-from bs4 import BeautifulSoup
-from sqlalchemy import create_engine, text, func
+import os
 
+load_dotenv()
 app = Flask(__name__)
-
-GOOGLE_ID = '366440015055-80qt2vadqs9ouafvg64ljkrdcs9mp3vm.apps.googleusercontent.com'
-GOOGLE_CLIENTE_SECRET = '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'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://userdb:@localhost/db_sugest'
 db = SQLAlchemy(app)
 
 app.secret_key = 'seu_segredo'
-app.config['GOOGLE_CLIENT_ID'] =  '366440015055-80qt2vadqs9ouafvg64ljkrdcs9mp3vm.apps.googleusercontent.com'
-app.config['GOOGLE_CLIENT_SECRET'] = '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'
+app.config['GOOGLE_CLIENT_ID'] =  os.getenv('GOOGLE_ID')
+app.config['GOOGLE_CLIENT_SECRET'] = os.getenv('GOOGLE_CLIENT_SECRET')
 
 oauth = OAuth(app)
 google = oauth.register(

@@ -1,9 +1,9 @@
-.gitignore
 __pycache__/
 .vscode/
 menv/
 readme/
+.gitignore
 .DS_Store
 Dockerfile
 docker-compose.yml
-nginx.conf
+.env
