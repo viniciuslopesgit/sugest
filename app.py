@@ -35,11 +35,11 @@ google = oauth.register(
 # -------------------------------- FUNÇÕES --------------------------------------
 
 # Criando login de usuário com a conta Google
-class User(db.Model):
+class tbl_user(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(255))
-    name = db.Column(db.String(255))
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password = db.Column(db.String(100))
+    name = db.Column(db.String(100))
 
     def __init__(self, email, name, password=None):
         self.email = email
@@ -71,7 +71,7 @@ def insert_initial_user_favs(user_id):
     
     # Seleciona aleatoriamente 5 URLs da tabela url_data
     try:
-        engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
+        engine = create_engine(os.getenv('POSTGRES_LOGIN'))
         query = "SELECT id, name, url FROM url_data ORDER BY random() LIMIT 5"
         url_data = pd.read_sql(query, con=engine)
     except Exception as e:
@@ -202,9 +202,9 @@ def authorize():
         session['name'] = name
 
         # Verifica se o usuário já existe no banco de dados
-        user = User.query.filter_by(email=email).first()
+        user = tbl_user.query.filter_by(email=email).first()
         if not user:
-                new_user = User(email=email, name=name)
+                new_user = tbl_user(email=email, name=name)
                 db.session.add(new_user)
                 db.session.commit()
 
