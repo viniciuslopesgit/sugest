@@ -15,7 +15,7 @@ import os
 load_dotenv()
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://userdb:@localhost/db_sugest'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('POSTGRES_LOGIN')
 db = SQLAlchemy(app)
 
 app.secret_key = 'seu_segredo'
@@ -108,7 +108,7 @@ def recommend_sites_for_user():
         print("Nenhum site está favoritado")
         return "Nenhum site está favoritado"
     
-    engine = create_engine('postgresql://userdb:@localhost/db_sugest')
+    engine = create_engine(os.getenv('POSTGRES_LOGIN'))
 
     query = "SELECT id, name, url, description FROM url_data"
     url_data = pd.read_sql(query, con=engine)
@@ -244,7 +244,7 @@ def dashboard():
         recommend_sites = recommend_sites_for_user()
 
         # Seleciona novamente os dados das URLs para este usuário
-        engine = create_engine('postgresql://userdb:@localhost/db_sugest')
+        engine = create_engine(os.getenv('POSTGRES_LOGIN'))
         query = "SELECT id, name, url, description FROM url_data"
         url_data = pd.read_sql(query, con=engine)
 
