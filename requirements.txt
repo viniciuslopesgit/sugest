@@ -1,0 +1,13 @@
+Flask
+psycopg2-binary
+Flask-SQLAlchemy
+authlib
+requests
+numpy
+pandas
+scikit-learn
+beautifulsoup4 
+newspaper3k 
+sumy
+lxml_html_clean
+newspaper3k

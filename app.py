@@ -1,44 +1,45 @@
+from flask import Flask, redirect, url_for, session, render_template, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from authlib.integrations.flask_client import OAuth
+from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
+from datetime import datetime
+from bs4 import BeautifulSoup
+from sqlalchemy import create_engine, text, func
 import pandas as pd
 import random
 import psycopg2
 import requests
-from werkzeug.security import generate_password_hash
-from datetime import datetime
-from flask import Flask, redirect, url_for, session, render_template, request, jsonify
-from authlib.integrations.flask_client import OAuth
-from flask_sqlalchemy import SQLAlchemy
-from bs4 import BeautifulSoup
-from sqlalchemy import create_engine, text, func
+import os
 
+load_dotenv()
 app = Flask(__name__)
 
-
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://viniciuslopes:@localhost/db_sugest'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('POSTGRES_LOGIN')
 db = SQLAlchemy(app)
 
 app.secret_key = 'seu_segredo'
-app.config['GOOGLE_CLIENT_ID'] = '213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com'
-app.config['GOOGLE_CLIENT_SECRET'] = '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'
+app.config['GOOGLE_CLIENT_ID'] =  os.getenv('GOOGLE_ID')
+app.config['GOOGLE_CLIENT_SECRET'] = os.getenv('GOOGLE_CLIENT_SECRET')
 
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
-    client_id='213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com',
-    client_secret='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',
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid profile email'},
+    client_id = os.getenv('GOOGLE_ID'),
+    client_secret = os.getenv('GOOGLE_CLIENT_SECRET'),
+    server_metadata_url = 'https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs = {'scope': 'openid profile email'},
 )
 
 
 # -------------------------------- FUNÇÕES --------------------------------------
 
 # Criando login de usuário com a conta Google
-class User(db.Model):
+class tbl_user(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(255))
-    name = db.Column(db.String(255))
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password = db.Column(db.String(100))
+    name = db.Column(db.String(100))
 
     def __init__(self, email, name, password=None):
         self.email = email
@@ -69,9 +70,13 @@ def insert_initial_user_favs(user_id):
         return
     
     # Seleciona aleatoriamente 5 URLs da tabela url_data
-    engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
-    query = "SELECT id, name, url FROM url_data ORDER BY random() LIMIT 5"
-    url_data = pd.read_sql(query, con=engine)
+    try:
+        engine = create_engine(os.getenv('POSTGRES_LOGIN'))
+        query = "SELECT id, name, url FROM url_data ORDER BY random() LIMIT 5"
+        url_data = pd.read_sql(query, con=engine)
+    except Exception as e:
+        print("Erro ao conectar ao banco de dados:", e)
+        return
 
     for _, row in url_data.iterrows():
         name = row['name']
@@ -103,7 +108,7 @@ def recommend_sites_for_user():
         print("Nenhum site está favoritado")
         return "Nenhum site está favoritado"
     
-    engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
+    engine = create_engine(os.getenv('POSTGRES_LOGIN'))
 
     query = "SELECT id, name, url, description FROM url_data"
     url_data = pd.read_sql(query, con=engine)
@@ -197,9 +202,9 @@ def authorize():
         session['name'] = name
 
         # Verifica se o usuário já existe no banco de dados
-        user = User.query.filter_by(email=email).first()
+        user = tbl_user.query.filter_by(email=email).first()
         if not user:
-                new_user = User(email=email, name=name)
+                new_user = tbl_user(email=email, name=name)
                 db.session.add(new_user)
                 db.session.commit()
 
@@ -239,7 +244,7 @@ def dashboard():
         recommend_sites = recommend_sites_for_user()
 
         # Seleciona novamente os dados das URLs para este usuário
-        engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
+        engine = create_engine(os.getenv('POSTGRES_LOGIN'))
         query = "SELECT id, name, url, description FROM url_data"
         url_data = pd.read_sql(query, con=engine)
 
