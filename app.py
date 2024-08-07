@@ -12,20 +12,21 @@ from sqlalchemy import create_engine, text, func
 
 app = Flask(__name__)
 
+GOOGLE_ID = '366440015055-80qt2vadqs9ouafvg64ljkrdcs9mp3vm.apps.googleusercontent.com'
+GOOGLE_CLIENTE_SECRET = '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'
 
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://viniciuslopes:@localhost/db_sugest'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://userdb:@localhost/db_sugest'
 db = SQLAlchemy(app)
 
 app.secret_key = 'seu_segredo'
-app.config['GOOGLE_CLIENT_ID'] = '213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com'
-app.config['GOOGLE_CLIENT_SECRET'] = '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'
+app.config['GOOGLE_CLIENT_ID'] =  '366440015055-80qt2vadqs9ouafvg64ljkrdcs9mp3vm.apps.googleusercontent.com'
+app.config['GOOGLE_CLIENT_SECRET'] = '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'
 
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
-    client_id='213167038682-1ch7jaaqftacmkoc6c127qim1te6kjoh.apps.googleusercontent.com',
-    client_secret='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',
+    client_id='366440015055-80qt2vadqs9ouafvg64ljkrdcs9mp3vm.apps.googleusercontent.com',
+    client_secret='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',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid profile email'},
 )
@@ -69,9 +70,13 @@ def insert_initial_user_favs(user_id):
         return
     
     # Seleciona aleatoriamente 5 URLs da tabela url_data
-    engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
-    query = "SELECT id, name, url FROM url_data ORDER BY random() LIMIT 5"
-    url_data = pd.read_sql(query, con=engine)
+    try:
+        engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
+        query = "SELECT id, name, url FROM url_data ORDER BY random() LIMIT 5"
+        url_data = pd.read_sql(query, con=engine)
+    except Exception as e:
+        print("Erro ao conectar ao banco de dados:", e)
+        return
 
     for _, row in url_data.iterrows():
         name = row['name']
@@ -103,7 +108,7 @@ def recommend_sites_for_user():
         print("Nenhum site está favoritado")
         return "Nenhum site está favoritado"
     
-    engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
+    engine = create_engine('postgresql://userdb:@localhost/db_sugest')
 
     query = "SELECT id, name, url, description FROM url_data"
     url_data = pd.read_sql(query, con=engine)
@@ -239,7 +244,7 @@ def dashboard():
         recommend_sites = recommend_sites_for_user()
 
         # Seleciona novamente os dados das URLs para este usuário
-        engine = create_engine('postgresql://viniciuslopes:@localhost/db_sugest')
+        engine = create_engine('postgresql://userdb:@localhost/db_sugest')
         query = "SELECT id, name, url, description FROM url_data"
         url_data = pd.read_sql(query, con=engine)
 

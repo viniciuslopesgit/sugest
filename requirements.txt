@@ -1,10 +1,11 @@
 Flask
+psycopg2-binary
+Flask-SQLAlchemy
 authlib
 requests
 numpy
 pandas
 scikit-learn
-flask_sqlalchemy
 beautifulsoup4 
 newspaper3k 
 sumy
