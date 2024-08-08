@@ -36,6 +36,8 @@ google = oauth.register(
 
 # Isere dados da conta gmail do usuário no banco de dados
 class tbl_user(db.Model):
+    __tablename__ = 'tbl_user'
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(100))
@@ -48,6 +50,8 @@ class tbl_user(db.Model):
             self.password = generate_password_hash(password)
 
 class tbl_user_fav(db.Model):
+    __tablename__ = 'tbl_user_fav'
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     site_id = db.Column(db.Integer)
@@ -60,6 +64,22 @@ class tbl_user_fav(db.Model):
 
     def update_rate(self):
         self.rate += 1
+
+class tbl_sites(db.Model):
+    __tablename__ = 'tbl_sites'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    url = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String())
+    name = db.Column(db.String(100))
+
+    def __init__(self, user_id=user_id, url=url, description=description, name=name):
+        self.user_id = user_id
+        self.url = url
+        self.description = description
+        self.name = name
+
 
 def insert_initial_user_favs(user_id):
     # Verifica se já existem favoritos para este usuário
@@ -77,11 +97,9 @@ def insert_initial_user_favs(user_id):
         return
     
     for _, row in tbl_sites.iterrows():
-        #tbl_user_fav
+        #tbl_user_fav:
         #user_id, site_id, rate
-        
-        user_id = row['user_id']
-        site_id = row['id']
+        site_id = int(row['id'])
         rate = 1
         new_fav = tbl_user_fav(user_id=user_id, site_id=site_id, rate=rate)
         db.session.add(new_fav)
@@ -102,7 +120,7 @@ def recommend_sites_for_user():
         return "Usuário não está logado."
     
     # Recolher IDs dos sites com rate igual a 1
-    rated_urls = User_fav.query.filter_by(user_id=user_id, rate=1).all()
+    rated_urls = tbl_user_fav.query.filter_by(user_id=user_id, rate=1).all()
     rated_ids = [url.id for url in rated_urls]
 
     if not rated_ids:
@@ -110,7 +128,6 @@ def recommend_sites_for_user():
         return "Nenhum site está favoritado"
     
     engine = create_engine(os.getenv('POSTGRES_LOGIN'))
-
     query = "SELECT id, name, url, description FROM url_data"
     url_data = pd.read_sql(query, con=engine)
 
@@ -208,13 +225,12 @@ def authorize():
                 new_user = tbl_user(email=email, name=name)
                 db.session.add(new_user)
                 db.session.commit()
+                user = new_user
 
-                # Insere URLs favoritas iniciais para o novo usuário
-                user_id = email.split('@')[0]
-                insert_initial_user_favs(user_id)
+        session['user_id'] = user.id
         
-        # Simulação de um user_id
-        session['user_id'] = email.split('@')[0]
+        insert_initial_user_favs(user.id)
+
         print('Usuário autenticado com sucesso:', email)
         return redirect(url_for('dashboard'))
     
@@ -230,16 +246,20 @@ def dashboard():
     if email:
         user_id = session.get('user_id')
         
-        # Consulta ao banco de dados para recuperar as notícias do usuário atual
-        user_news = User_fav.query.filter_by(user_id=user_id).order_by(func.random()).limit(5).all()
+        # Consulta ao banco de dados para recuperar os sites favoritos do usuário atual
+        user_news = db.session.query(tbl_user_fav, tbl_sites).join(tbl_sites, tbl_user_fav.site_id == tbl_sites.id
+                    ).filter(
+                        tbl_user_fav.user_id == user_id
+                    ).order_by(func.random()).limit(5).all()
+        
         urls = []
-        for news in user_news:
+        for fav, site in user_news:
             urls.append({
-                'id': news.id,
-                'user_id': news.user_id,
-                'name': news.name,
-                'url': news.url,
-                'rate': news.rate
+                'id': fav.id,
+                'user_id': fav.user_id,
+                'name': site.name,
+                'url': site.url,
+                'rate': fav.rate
             })
 
         recommend_sites = recommend_sites_for_user()
@@ -265,7 +285,7 @@ def update_rate():
     rate = data.get('rate')
 
     # Consulta ao banco de dados para encontrar a notícia correspondente
-    news_item = User_fav.query.filter_by(user_id=user_id, url=url).first()
+    news_item = tbl_user_fav.query.filter_by(user_id=user_id, url=url).first()
     
     if news_item:
         # Atualiza o valor de 'rate' no banco de dados
