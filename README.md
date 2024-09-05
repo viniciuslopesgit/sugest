@@ -9,9 +9,9 @@ Intuitive Interface: A simple, user-friendly design that ensures a seamless expe
 
 ## :rocket: Technologies Used
 Frontend:
-[Flask] for building a dynamic, responsive user interface.
+[Flask and HML5/Javascript] for building a dynamic, responsive user interface.
 Backend:
-[Pandas and] to manage server logic and backend operations.
+[Pandas and Sqlalchemy] to manage server logic and backend operations.
 Database:
 [PostgreSQL/MySQL/MongoDB] for storing user favourites and generating recommendations.
 Recommendation Algorithm:
