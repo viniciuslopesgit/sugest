@@ -13,7 +13,7 @@ Frontend:
 Backend:
 [Pandas and Sqlalchemy] to manage server logic and backend operations.
 Database:
-[PostgreSQL/MySQL/MongoDB] for storing user favourites and generating recommendations.
+[PostgreSQL] for storing user favourites and generating recommendations.
 Recommendation Algorithm:
 Machine Learning used to provide personalised site suggestions based on user preferences.
 
